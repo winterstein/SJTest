@@ -1,0 +1,58 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>WW Lib Test</title>
+<!-- Bootstrap -->
+<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+
+  <script src="../zepto.min.js"></script>
+  <script>window.jQuery = $; /* lie! */</script>
+    
+  <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+   
+  <script src="SJTest.js"></script>
+  <script>  	
+  	SJTest.on = true;
+  </script>
+  
+  <script src="Object.js"></script>
+  <script src="Array.js"></script>
+  <script src="String.js"></script>
+  <script src="HashMap.js"></script>
+
+</head>
+<body>
+<script>
+
+
+SJTest.runScript("SJTestTest.js");
+
+SJTest.run({name:'Array',
+	flattenNoOp: function() {
+		var a = [1,2,3];
+		var fa = a.flatten();
+		assert(match(fa, [1,2,3]), fa);
+		
+		a = [];
+		fa = a.flatten();
+		assert(match(fa, []), fa);
+	},
+	
+	flattenSimple: function() {
+		var a = [1, [2,3], [4,5], 6, [7,8,9]];
+		var fa = a.flatten();
+		assert(match(fa, [1,2,3,4,5,6,7,8,9]), fa);
+	},
+	
+	flattenDeep: function() {
+		var a = [1, [2,3], [4, [5]], [[6]], [7,[8],9,[10,[11]]]];
+		var fa = a.flatten();
+		assert(match(fa, [1,2,3,4,5,6,7,8,9,10,11]), fa);
+	}
+	
+});
+
+</script>
+</body>
+</html>

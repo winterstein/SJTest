@@ -1,0 +1,70 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>SJTest Test with Delay</title>
+<!-- Bootstrap -->
+<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+
+  <script src="../zepto.min.js"></script>
+  <script>window.jQuery = $; /* lie! */</script>
+    
+  <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+   
+  <script src="SJTest.js"></script>
+  <script>SJTest.on=true;</script>
+  
+  <script src="Object.js"></script>
+  <script src="Array.js"></script>
+  <script src="String.js"></script>
+  <script src="HashMap.js"></script>
+
+</head>
+<body>
+<script>
+
+$(function() {
+	SJTest.run({name:'WithDelay',
+		AfterPageLoad: function() {
+			return "All Good :)";
+		}
+	});	
+});
+
+setTimeout(function(){
+	SJTest.run({name:'WithDelay',
+		SmallTimeout: function() {
+			return "All Good :)";
+		}
+	});
+}, 5);
+
+var done = new Date().getTime()+2000;
+SJTest.runTest(
+	'ASyncTest', function() {
+		console.log("ASync part one");
+	},
+	function() {
+		if (new Date().getTime() > done) {
+			console.log("ASync part two done");
+			return "Done!";
+		}
+		return false;
+	}
+);
+
+
+SJTest.runTest(
+	'ASyncTestTimeOut-ShouldFail', function() {
+		console.log("ASync timeout part one");
+	},
+	function() {
+		return false;
+	}, 
+	1000 
+);
+
+
+</script>
+</body>
+</html>
