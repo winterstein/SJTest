@@ -1,15 +1,31 @@
 /**
  * SJTest
+ * @author Daniel Winterstein (http://winterstein.me.uk)
  * 
- * Requires: jQuery (or zepto)
+ * Requires: nothing!
  * 
- * Will use if present: Winterwell's assert.js, URL.js Will create if absent:
+ * Will use if present:
+ * 
+ * jQuery (or zepto)
+ * Bootstrap 
+ * Winterwell's assert.js
+ * 
+ * 
+ * Will create if absent:
+ * 
  * assert = SJTest.assert
+ * assertArgs = SJTest.assertArgs
+ * match = SJTest.match
+ * isa = SJTest.isa
  * 
- * Usage: Must be switched on with SJTest.on = true;
+ * Usage:
+ *  
+ *  - In the browser, must be switched on with SJTest.on = true; Or by adding SJTest=on to the url.
+ *  - In PhantomJS: Run phantomjs SJTest.js MyTest1.html MyTest2.html
  */
+//(function(){
+//	if (window.SJTest) return;	
 
-if ( ! window.SJTest) {
 	
 	//	*********************
 	// 	****    ATest    ****
@@ -57,17 +73,29 @@ if ( ! window.SJTest) {
 				this.status = 'pass';
 				return;
 			}
-			// waitFor?
-			SJTest.waitFor(waitForThis, function(yes) {
-					this.status = 'pass';
-					if (yes !== true) this.details = yes;
-					if (SJTest._displayTable) SJTest._displayTest(this); 
-				}.bind(this), // TODO fails in Phantom?? 
-				timeout || 5000, function() {
-					this.error = new Error("Timeout");
-					this.status = 'fail';
-					if (SJTest._displayTable) SJTest._displayTest(this);
-				}.bind(this));
+			
+			// waitFor?			
+			var atest = this;
+			var testDoneFn = function(yes) {
+				console.log("ATest.this", atest);
+				atest.status = 'pass';
+				SJTest.passed.push(atest);
+				if (yes !== true) atest.details = yes;
+				assert(match(SJTest._displayTest, Function));
+				if (SJTest._displayTable) SJTest._displayTest(this); 
+			}; 					
+			
+			var timeoutFn = function() {
+				console.log("TIMEOUT ATest.this", atest);				
+				atest.error = new Error("Timeout");
+				atest.status = 'fail';
+				SJTest.failed.push(atest);
+				assert(match(SJTest._displayTest, Function));
+				if (SJTest._displayTable) SJTest._displayTest(this);
+			};
+			
+			SJTest.waitFor(waitForThis, testDoneFn, 
+				timeout || 5000, timeoutFn);
 		} catch(error) {
 			this.error = error;
 			if (error && error.stack) this.stack = error.stack;
@@ -109,14 +137,12 @@ if ( ! window.SJTest) {
 		 */
 	SJTest.styling = true;
 	SJTest.LOGTAG = 'SJTest';
-		/**
-		 * Scripts and tests to load & run before we're done.
-		 */
-	SJTest.q = [];
-	SJTest._pages = [];
 	
 		/** Is testing on? Set to true/false to activate/deactivate SJTest */
-	SJTest.on = false
+	SJTest.on = false;
+	
+	/** true by default: Expose SJTest.assert() as global functions -- plus assertArgs(), isa(), and match()*/
+	SJTest.expose = true;
 
 	/**
 	 * {Boolean} If off (the default), then SJTest will do nothing! Which lets you include tests in production code.
@@ -151,6 +177,7 @@ if ( ! window.SJTest) {
 	 * 
 	 */
 	SJTest.run = function(testSet) {
+		console.log("SJTest.run");
 		assert(typeof testSet === 'object', testSet);
 		var setName = testSet.name || false;
 		for(var tName in testSet) {
@@ -166,17 +193,26 @@ if ( ! window.SJTest) {
 	 * Use-case: To avoid PhantomJS stopping early before after-page-load tests are setup.
 	 * @see SJTest.wait
 	 */
-	SJTest.minTime = 100;
+	SJTest.minTime = 5000;
 	SJTest._started = new Date().getTime();
+	
+	/**
+	 * @returns {Boolean} true if all tests are run, and minTime has expired
+	 */
 	SJTest.isDone = function() {
-		if (SJTest.wait) return false;
-		if (SJTest.q || SJTest._pages) return false;
-		if (new Date().getTime() < SJTest._started + SJTest.minTime) return false;
+		console.log("isDone?");
+		assert( ! SJTest.phantomjsTopLevel);
+		if (SJTest.wait) return false;		
+		if (new Date().getTime() < SJTest._started + SJTest.minTime) {
+			console.log("Wait!");
+			return false;
+		}
 		// Any running tests?
 		for(var i=0; i<SJTest.tests.length; i++) {
 			var test = SJTest.tests[i];
 			if (test.status==='running...') return false;
 		}
+		console.log("isDone! ", SJTest.tests.length);
 		return true;
 	};
 		
@@ -194,8 +230,10 @@ if ( ! window.SJTest) {
 	 *            {?number} max milliseconds to allow. Default to 5000 (5
 	 *            seconds)
 	 */
-	SJTest.runTest = function(testName, testFn, waitForThis, timeout) {		
+	SJTest.runTest = function(testName, testFn, waitForThis, timeout) {
+		console.log("SJTest.runTest", testName);
 		if ( ! SJTest.on) {
+			console.log("SJTest.runTest"+testName+" NOT!");
 			return;		
 		}
 		var dtest = false;
@@ -223,9 +261,9 @@ if ( ! window.SJTest) {
 				skip = true;
 			}
 			if (SJTest.skip) {
-				for(var i=0; i<SJTest.skip.length; i++) {
-					
-				}			
+				if (SJTest.skip.indexOf(testName)!=-1) {
+					skip = true;
+				}
 			}
 			if (SJTest.only) {
 				for(var i=0; i<SJTest.only.length; i++) {
@@ -287,7 +325,7 @@ if ( ! window.SJTest) {
 			}		
 			SJTest._displayPanel = $("#SJTestDisplay"); // TODO factor jquery into polyfill
 			if (SJTest._displayPanel.length==0) {
-				console.log(SJTest.LOGTAG, "Display Make it!");
+				//console.log(SJTest.LOGTAG, "Display Make it!");
 				SJTest._displayPanel = $(
 						"<div id='SJTestDisplay' "
 						+(SJTest.styling? "style='position:fixed;top:0px;right:0px;width:70%;overflow:auto;max-height:100%;'" : '')
@@ -324,8 +362,8 @@ if ( ! window.SJTest) {
 		if ( ! tr.length) {
 			tr = $("<tr id='"+trid+"'></tr>");
 			SJTest._displayTable.append(tr);
-			console.log('make it', trid);
-		} else console.log('got it',trid);
+			//console.log('make it', trid);
+		} //else console.log('got it',trid);
 		if (SJTest.styling) {
 			var col = test.status=='pass'? '#9f9' : test.status=='skip'? '#ccf' : test.status=='running...'? '#fff' : '#f99';			
 			$(tr).css({border:'1px solid #333', 'background-color':col});
@@ -469,14 +507,16 @@ if ( ! window.SJTest) {
 	};
 	
 	if ( ! window.match) window.match = SJTest.match;
-		
+	
+	SJTest._scriptsInProcessing = [];
+	
 	SJTest.runScript = function(url, after) {
 			if ( ! SJTest.on) return;
 			console.log('runScript', url);
-			SJTest.q.push(url);
+			SJTest._scriptsInProcessing.push(url);
 			SJTestUtils.load(url, function() {
 				console.log('runScript Done', url);
-				SJTest.q.removeValue(url);
+				SJTest._scriptsInProcessing.removeValue(url);
 				if (after) after(); 
 			}); // TODO .fail()
 	// function() {
@@ -496,37 +536,43 @@ if ( ! window.SJTest) {
 	 * 
 	 */
 	SJTest.waitFor = function(condition, callback, timeout, onTimeout) {
+		SJTest.assertArgs(condition, Function, callback, Function); //, timeout, "?Number", onTimeout, "?Function");
 		SJTest.waitFor.waitingFor.push([condition, callback, timeout? new Date().getTime()+timeout : false, onTimeout]);
 		SJTest.waitFor.check();
 	};
 
 	SJTest.waitFor.waitingFor = [];
-
+	/**
+	 * {Number} Check every n milliseconds. Default: 50
+	 */
+	SJTest.waitFor.period = 1000;
+	
 	SJTest.waitFor.check = function() {
-	  var stillWaitingFor = [];
-	  for (var i = 0; i < SJTest.waitFor.waitingFor.length; i++) {
-		  var row = SJTest.waitFor.waitingFor[i];
-	    var condMet = false;
-	    try {
-	      condMet = row[0]();
-	    } catch (e) {}
-	    if (condMet) {
-	    	row[1](condMet);
-	    	continue;
-	    }
-	    if (row[2] && new Date().getTime() > row[2]) {
-	    	// time out!
-	    	if (row[3]) row[3]();
-	    	else if (console) console.log("waitFor timeout "+row[0]);
-	    	continue;
-	    }
-	     stillWaitingFor.push(SJTest.waitFor.waitingFor[i]);
-	  }
+		var stillWaitingFor = [];
+		for (var i = 0; i < SJTest.waitFor.waitingFor.length; i++) {
+			var row = SJTest.waitFor.waitingFor[i];
+			var condMet = false;
+			try {
+				condMet = row[0]();
+			} catch (e) {}
+			if (condMet) {
+				row[1](condMet);
+				continue;
+			}
+			if (row[2] && new Date().getTime() > row[2]) {
+				// time out!
+				console.log("waitFor timeout "+row[0]);
+				if (row[3]) row[3]();				
+				continue;
+			}
+			stillWaitingFor.push(SJTest.waitFor.waitingFor[i]);
+		}
 
-	  SJTest.waitFor.waitingFor = stillWaitingFor;
-	  if (stillWaitingFor.length > 0) {
-	    setTimeout(SJTest.waitFor.check, 5);
-	  }
+		SJTest.waitFor.waitingFor = stillWaitingFor;
+		if (stillWaitingFor.length > 0) {
+			//console.log("still waiting: ",stillWaitingFor);
+			setTimeout(SJTest.waitFor.check, SJTest.waitFor.period);
+		}
 	};
 		
 	
@@ -569,26 +615,23 @@ if ( ! window.SJTest) {
 			window.console.log = function(){};
 		}
 		
-		
-		
+				
 		/**
 		 * url {string}, callback {function}
 		 */
-		if ( ! SJTestUtils.load) {		
-			if (window.$ && $.getScript) {
-				// jQuery :)
-				SJTestUtils.load = $.getScript;		
-			} else {	
-				SJTestUtils.load = function(url, callback) {
-					console.log("loading...", url);
-					var oHead = document.getElementsByTagName('head')[0];
-					var oScript = document.createElement('script');
-					oScript.type = 'text/javascript';
-					oScript.src = url;
-					oScript.onload = callback;
-					oHead.appendChild(oScript);
-				};
-			}
+		if (window.$ && $.getScript) {
+			// jQuery :)
+			SJTestUtils.load = $.getScript;		
+		} else {	
+			SJTestUtils.load = function(url, callback) {
+				console.log("loading...", url);
+				var oHead = document.getElementsByTagName('head')[0];
+				var oScript = document.createElement('script');
+				oScript.type = 'text/javascript';
+				oScript.src = url;
+				oScript.onload = callback;
+				oHead.appendChild(oScript);
+			};
 		} // load()
 		
 		/**
@@ -620,8 +663,7 @@ if ( ! window.SJTest) {
 					var safe = {};
 					for(var p in obj) {
 						var v = obj[p];
-						if (typeof(v) == 'function') continue; // safe[p] =
-																// 'function';
+						if (typeof(v) == 'function') continue;
 						else safe[p] = ""+v;
 					}
 					return JSON.stringify(safe);
@@ -631,7 +673,7 @@ if ( ! window.SJTest) {
 		
 		
 		// Make SJTest functions global??
-		if (true) {
+		if (SJTest.expose) {
 			// assert
 			if ( ! window.assert) {
 				window.assert = SJTest.assert;
@@ -664,6 +706,10 @@ if ( ! window.SJTest) {
 				( ! window.location.pathname || window.location.pathname.length < 2 || window.location.pathname.substr(-'SJTest.js'.length)==='SJTest.js')) 
 		{
 			SJTest.phantomjsTopLevel = true;
+		} else {
+			// disable display
+			SJTest.display = function(){};
+			SJTest._displayTest = function(){};
 		}
 	}
 	
@@ -671,18 +717,27 @@ if ( ! window.SJTest) {
 	SJTestUtils.init();
 	
 	
+	
+	
+	// Phantom Runner?
+	var SJTest4Phantom = {}; 
+	
+
 	/**
 	 * Go through the queue loading & running tests
 	 */
-	SJTest._doThemAll = function() {
-		if (SJTest.q.length==0) {				
-			setTimeout(SJTest._doThemAll(), 50);
-			return;
-		}
-		var url = SJTest.q.pop();
-		var cback = function() { SJTest._doThemAll(); };
+	SJTest4Phantom._doThemAll = function() {
+//		if (SJTest.q.length==0) {				
+//			setTimeout(SJTest._doThemAll(), 50);
+//			return;
+//		}
+		var url = SJTest4Phantom._pagesToLoad.pop();
+		var cback = function() { 
+			SJTest4Phantom._doThemAll(); 
+		};
 		// console.log("url="+url+" from ", SJTest.q);
 		assert(url);
+		assert(SJTest.phantomjsTopLevel, SJTest);
 		var page = require('webpage').create();
 		// echo console messages
 		page.onConsoleMessage = function(m){
@@ -702,15 +757,14 @@ if ( ! window.SJTest) {
 			 // Switch SJTest on!
 			if (url.indexOf('?')!=-1) url += "&SJTest=1"; else url += "?SJTest=1";
 			page.open(url, cback);
-			SJTest._pages.push(page);
+			SJTest4Phantom._pagesInProcessing.push(page);
 			console.log("PhantomJS opened: "+url+"...");			
 		}
 	}; // ./ doThemAll
 	
 	
 	
-	SJTestUtils.goPhantom = function() {		
-		// PhantomJS (command line)
+	SJTest4Phantom.goPhantom = function() {
 		var args = require('system').args;
 		if (args[0].substr( - 'SJTest.js'.length) === 'SJTest.js') {
 			SJTest.on = true;
@@ -730,12 +784,13 @@ if ( ! window.SJTest) {
 		for(var i=1; i<args.length; i++) {	    	
 	    	var url = args[i];
 			console.log("PhantomJS queuing: "+url+"...");			
-			SJTest.q.push(url);
+			SJTest4Phantom._pagesToLoad.push(url);
 	    }
-	    // console.log("GO");
-	    SJTest._doThemAll();
 	    
-	    SJTest.waitFor(SJTest.isDone(),
+		console.log("GO");
+		SJTest4Phantom._doThemAll();
+	    
+	    SJTest.waitFor(SJTest4Phantom.isDoneTopLevel,
 	    	function() {
 		    	var p = SJTest.passed.length, f = SJTest.failed.length, s = SJTest.skipped.length;
 		    	console.log("");
@@ -743,17 +798,46 @@ if ( ! window.SJTest) {
 		    	if (f==0) console.log(SJTest.LOGTAG, ":)");
 		    	else console.log(SJTest.LOGTAG, ":(");
 		    	phantom.exit();
-	    	});
-	}; // ./ go
+	    	});	
+	};
+	
 
+	SJTest4Phantom.isDoneTopLevel = function() {
+		console.log("isDoneTopLevel?");
+		assert(SJTest.phantomjsTopLevel);
+		// Are the pages done?
+		for(var i=0; i<SJTest4Phantom._pagesInProcessing.length; i++) {
+			var page = SJTest4Phantom._pagesInProcessing[i];
+			var done = page.evaluate(function() {return SJTest.isDone();});
+			console.log(SJTest.phantomjsTopLevel+" "+page.url+" done "+done);
+			if (done) {
+				console.log("Remove page!",page);
+				SJTest4Phantom._pagesInProcessing.removeValue(page);
+				try {page.close();} catch(err) {}
+			}
+		}
+		if (SJTest4Phantom._pagesToLoad.length > 0 || SJTest4Phantom._pagesInProcessing.length > 0) {
+			console.log("Q", SJTest4Phantom._pagesToLoad, "Pages", SJTest4Phantom._pagesInProcessing);
+			return false;
+		}
+		console.log("DoneTopLevel!");
+		return true;
+	};
+	
+	/**
+	 * Scripts and tests to load & run before we're done.
+	 */
+	SJTest4Phantom._pagesToLoad = [];
+	SJTest4Phantom._pagesInProcessing = [];
 
+	
 	if ( ! SJTest.phantomjsTopLevel) {
 		// pause momentarily to allow SJTest.on to maybe be set manually
 		SJTestUtils.onLoad(function() {
 			setTimeout(SJTest.display, 1);
 		});
 	} else {
-		SJTestUtils.goPhantom();
+		SJTest4Phantom.goPhantom();
 	}
-	
-} // end !SJTest
+
+//}()); // end !SJTest wrapper function

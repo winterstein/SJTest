@@ -6,22 +6,17 @@
 <!-- Bootstrap -->
 <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
 
-  <script src="../zepto.min.js"></script>
-  <script>window.jQuery = $; /* lie! */</script>
-    
-  <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+	<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
    
   <script src="SJTest.js"></script>
   <script>SJTest.on=true;</script>
-  
-  <script src="Object.js"></script>
-  <script src="Array.js"></script>
-  <script src="String.js"></script>
-  <script src="HashMap.js"></script>
 
 </head>
 <body>
 <script>
+console.log("RANNING?!");
 
 $(function() {
 	SJTest.run({name:'WithDelay',
@@ -63,6 +58,8 @@ SJTest.runTest(
 	}, 
 	1000 
 );
+
+console.log("RAN?!");
 
 
 </script>
