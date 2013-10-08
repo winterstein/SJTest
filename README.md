@@ -10,8 +10,12 @@
 	<html>
 		<head>
 			<!-- You don't need jQuery or Bootstrap, but if they're present, we use them for nicer output. -->
+			<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+			<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+			<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
 
-			<script src=''></script>
+			<!-- SJTest.js -->
+			<script src='https://raw.github.com/winterstein/SJTest/master/SJTest.min.js'></script>
 		</head>
 		<body>
 			<script>
