@@ -796,6 +796,7 @@
 			console.warn("SJTest OFF: Did not recognise script "+args[0]);		
 		}
 		if (args.length === 1) {
+			console.log('SJTest version 0.1 by Daniel Winterstein');
 		    console.log('Usage: phantomjs SJTest.js MyTestFile1.html MyTestFile2.html ...');
 		    phantom.exit();
 		    return;
