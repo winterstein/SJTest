@@ -78,7 +78,7 @@
 			var atest = this;
 			var testDoneFn = function(yes) {
 				console.log("ATest.this", atest);
-				atest.status = 'pass';
+				atest.setStatus('pass');
 				SJTest.passed.push(atest);
 				if (yes !== true) atest.details = yes;
 				assert(match(SJTest._displayTest, Function));
@@ -89,7 +89,6 @@
 				console.log("TIMEOUT ATest.this", atest);				
 				atest.error = new Error("Timeout");
 				atest.status = 'fail';
-				SJTest.failed.push(atest);
 				assert(match(SJTest._displayTest, Function));
 				if (SJTest._displayTable) SJTest._displayTest(this);
 			};
