@@ -412,6 +412,14 @@
 	};
 	
 	/**
+	 * Convenience for assert(match(value, matcher), value+" !~ "+matcher);
+	 * Because it's a common use case.
+	 */
+	SJTest.assertMatch = function(value, matcher) {
+		assert(match(value, matcher), value+" !~ "+matcher);
+	};
+	
+	/**
 	 * Like instanceof, but more reliable.
 	 * 
 	 * @param obj
@@ -598,7 +606,16 @@
 			setTimeout(SJTest.waitFor.check, SJTest.waitFor.period);
 		}
 	};
-		
+	
+	/**
+	 * TODO How many tests should we see? If less than this, then not done
+	 */
+	SJTest.expectTests = function(n, timeout) {
+		SJText._expectTests = n;
+		SJTest.runTest("expectTests", 
+				function(){}, 
+				function(){return SJTest.tests.length >= n;}, timeout);
+	};
 	
 	
 	//	***************************
@@ -711,11 +728,13 @@
 			//}
 			if ( ! window.assertArgs) {
 				window.assertArgs = SJTest.assertArgs;
-			}		
+			}
+			if ( ! window.assertMatch) {
+				window.assertMatch = SJTest.assertMatch;
+			}
 			if ( ! window.isa) {
 				window.isa = SJTest.isa;
 			}		
-
 			if ( ! window.str) {
 				window.str = SJTestUtils.str;
 			}		
@@ -845,7 +864,7 @@
 				console.log("Remove page!",page);
 				SJTest4Phantom._pagesInProcessing.removeValue(page);
 				try {page.close();} catch(err) {}
-			}
+			}			
 		}
 		if (SJTest4Phantom._pagesToLoad.length > 0 || SJTest4Phantom._pagesInProcessing.length > 0) {
 			console.log("Q", SJTest4Phantom._pagesToLoad, "Pages", SJTest4Phantom._pagesInProcessing);
