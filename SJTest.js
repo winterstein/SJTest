@@ -611,7 +611,7 @@
 	 * TODO How many tests should we see? If less than this, then not done
 	 */
 	SJTest.expectTests = function(n, timeout) {
-		SJText._expectTests = n;
+		SJTest._expectTests = n;
 		SJTest.runTest("expectTests", 
 				function(){}, 
 				function(){return SJTest.tests.length >= n;}, timeout);
