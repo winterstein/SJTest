@@ -40,7 +40,7 @@
 	function ATest(testName, testFn) {
 		this.name = testName;
 		this.fn = testFn;
-		this.status = 'queue';
+		this._status = 'queue';
 		this.stack = null;
 		/**
 		 * If a passing test returns a value (e.g. some useful extra info) --
@@ -52,11 +52,18 @@
 	}
 	ATest._idCnt = 0;
 	
+	Object.defineProperty(ATest.prototype, "status", {
+    	get: function() {return this._status;},
+    	set: function(s) {
+    		this._status = s;
+    		console.log(SJTest.LOGTAG+':'+this.status, this.name, this.details || this.stack || '');
+    	}
+	});
 	/**
 	 * @param waitFor
 	 *            {?function} see SJTest.runTest()
 	 * @param timeout
-	 *            {?number} milliseonds
+	 *            {?number} milliseonds Defaults to 5,000
 	 */
 	ATest.prototype.run = function(waitForThis, timeout) {
 		var old_re = window.reportError;
@@ -78,19 +85,20 @@
 			var atest = this;
 			var testDoneFn = function(yes) {
 				console.log("ATest.this", atest);
-				atest.setStatus('pass');
-				SJTest.passed.push(atest);
+				atest.status = 'pass';
+	//			SJTest.passed.push(atest);
 				if (yes !== true) atest.details = yes;
 				assert(match(SJTest._displayTest, Function));
-				if (SJTest._displayTable) SJTest._displayTest(this); 
+				if (SJTest._displayTable) SJTest._displayTest(atest); 
 			}; 					
 			
 			var timeoutFn = function() {
 				console.log("TIMEOUT ATest.this", atest);				
 				atest.error = new Error("Timeout");
 				atest.status = 'fail';
+				//SJTest.failed.push(atest);
 				assert(match(SJTest._displayTest, Function));
-				if (SJTest._displayTable) SJTest._displayTest(this);
+				if (SJTest._displayTable) SJTest._displayTest(atest);
 			};
 			
 			SJTest.waitFor(waitForThis, testDoneFn, 
@@ -101,7 +109,6 @@
 			this.status = 'fail';			
 		} finally {
 			window.reportError = old_re;
-			console.log(SJTest.LOGTAG+':'+this.status, this.name, this.details || this.stack || '');
 		}
 	};
 	
@@ -162,11 +169,11 @@
 	 * {Array<(ATest|String)>} ATest in live usage. Strings (via console) in
 	 * PhantomJS runner
 	 */
-	SJTest.passed = [];
+	//SJTest.passed = [];
 	/** {Array<(ATest|String)>} */
-	SJTest.failed = [];
+	//SJTest.failed = [];
 	/** {Array<(ATest|String)>} */
-	SJTest.skipped = [];
+	//SJTest.skipped = [];
 	
 	/**
 	 * @param testSet
@@ -192,7 +199,7 @@
 	 * Use-case: To avoid PhantomJS stopping early before after-page-load tests are setup.
 	 * @see SJTest.wait
 	 */
-	SJTest.minTime = 5000;
+	SJTest.minTime = 100;
 	SJTest._started = new Date().getTime();
 	
 	/**
@@ -284,9 +291,9 @@
 		}
 		// Result
 		if (dtest.status=='pass') {
-			SJTest.passed.push(dtest);
+	//		SJTest.passed.push(dtest);
 		} else {
-			SJTest.failed.push(dtest);
+	//		SJTest.failed.push(dtest);
 		}
 		// display now?
 		if (SJTest._displayTable) SJTest._displayTest(dtest);
@@ -297,26 +304,12 @@
 	/**
 	 * 
 	 */
-	SJTest.display = function(mode) {
+	SJTest.display = function() {
 			if ( ! SJTest.on) {
 				console.log(SJTest.LOGTAG, "Not on = no display");
 				return;
 			}	
 			console.log(SJTest.LOGTAG, "Display!");
-			
-			if (mode=="console") {
-				for(var i=0; i<SJTest.tests.length; i++) {
-					var test = SJTest.tests[i];
-					if (test.status==='pass') console.log(SJTest.LOGTAG, test.name, test.status);
-					else console.error(SJTest.LOGTAG, test.name, test.status, test.error);
-				}
-				return;
-			}
-			if (mode=="alert") {
-				alert(SJTestUtils.str(SJTest.tests));
-				return;
-			}
-			// Default to html (use Bootstrap table class)
 			var good=0,total=SJTest.tests.length;
 			for(var i=0; i<SJTest.tests.length; i++) {
 				var test = SJTest.tests[i];
@@ -355,6 +348,7 @@
 	 * @param test {ATest}
 	 */
 	SJTest._displayTest = function(test) {
+		assertArgs(test, ATest);
 		// Name includes a repeat button
 		var trid = "tr_SJTest_"+test._id;
 		var tr = $('#'+trid);
@@ -437,13 +431,44 @@
 		}
 		return false;
 	};
+
 	
+	/** Flexible matching test
+	* @param value 
+	* @param matcher Can be another value.
+		Or a Class.
+		Or a JSDoc-style class spec such as "?Number" or "Number|Function".
+		Or a regex (for matching against strings).
+		Or true/false (which match based on ifs semantics, e.g. '' matches false).
+		Or an object (which does partial matching, allowing value to have extra properties).
+	*/
 	SJTest.match = function(value, matcher) {
 		// simple
 		if (value == matcher) return true;
 		var sValue = ""+value;
 		if (typeof matcher==='string') {
-			// anything else??
+			// JSDoc type? e.g. ?Number or TODO String|Number
+			if (matcher[0] === '?' && (value===null || value===undefined)) {
+				return true;
+			}
+			// Get the class function
+			var ms = matcher.split("|");
+			for(var mi=0; mi<ms.length; mi++) {
+				var m = ms[mi].match(/^\??(\w+?)!?$/);
+				if ( ! m) break;
+				try {
+					var fn = new Function("return "+m);
+					var klass = fn();
+					if (SJTest.isa(value, klass)) {
+						return true;
+					} else {
+						return false;
+					}				
+				} catch(err) {
+					// oh well??
+				}				
+			}
+			return false;
 		}
 		// lenient true/false
 		if( ! matcher && ! value) return true;
@@ -544,7 +569,7 @@
 	/**
 	 * {Number} Check every n milliseconds. Default: 50
 	 */
-	SJTest.waitFor.period = 1000;
+	SJTest.waitFor.period = 50;
 	
 	SJTest.waitFor.check = function() {
 		var stillWaitingFor = [];
@@ -677,10 +702,13 @@
 			if ( ! window.assert) {
 				window.assert = SJTest.assert;
 			}
-			// attest = assert (useful if assert is already occupied)
-			if ( ! window.attest) {
-				window.attest = SJTest.assert;
+			if ( ! window.match) {
+				window.match = SJTest.match;
 			}
+			// attest = assert (useful if assert is already occupied) HM Bit confusing though to have 2 equiv functions
+			//if ( ! window.attest) {
+			//	window.attest = SJTest.assert;
+			//}
 			if ( ! window.assertArgs) {
 				window.assertArgs = SJTest.assertArgs;
 			}		
@@ -741,27 +769,27 @@
 		// echo console messages
 		page.onConsoleMessage = function(m){
 			console.log(m); // ?? filter by LOGTAG
-			if (m.substr(0, 'SJTest:pass'.length)==='SJTest:pass') {
-				SJTest.passed.push(m);
-			} else if (m.substr(0, 'SJTest:fail'.length)==='SJTest:fail') {
-				SJTest.failed.push(m);
-			} else if (m.substr(0, 'SJTest:skip'.length)==='SJTest:skip') {
-				SJTest.skipped.push(m);
+			var mcode = m.substr(0, 'SJTest:pass'.length);
+			if (mcode==='SJTest:pass') {
+				SJTest4Phantom.passed.push(m);
+			} else if (mcode==='SJTest:fail') {
+				SJTest4Phantom.failed.push(m);
+			} else if (mcode==='SJTest:skip') {
+				SJTest4Phantom.skipped.push(m);
 			}
 		};
-		if (url.substr(-3)==='.js') {
-			// TODO Why doesn't this work to run the script??
-			page.includeJs(url, cback);	
-		} else {
-			 // Switch SJTest on!
-			if (url.indexOf('?')!=-1) url += "&SJTest=1"; else url += "?SJTest=1";
-			page.open(url, cback);
-			SJTest4Phantom._pagesInProcessing.push(page);
-			console.log("PhantomJS opened: "+url+"...");			
-		}
+	
+		 // Switch SJTest on!
+		if (url.indexOf('?')!=-1) url += "&SJTest=1"; else url += "?SJTest=1";
+		page.open(url, cback);
+		SJTest4Phantom._pagesInProcessing.push(page);
+		console.log("PhantomJS opened: "+url+"...");			
 	}; // ./ doThemAll
 	
 	
+	SJTest4Phantom.passed = [];
+	SJTest4Phantom.failed = [];
+	SJTest4Phantom.skipped = [];
 	
 	SJTest4Phantom.goPhantom = function() {
 		var args = require('system').args;
@@ -771,7 +799,8 @@
 			console.warn("SJTest OFF: Did not recognise script "+args[0]);		
 		}
 		if (args.length === 1) {
-		    console.log('TODO Usage: phantomjs SJTest.js MyTestFile.html MyTestFile.js ...');
+			console.log('SJTest version 0.1 by Daniel Winterstein');
+		    console.log('Usage: phantomjs SJTest.js MyTestFile1.html MyTestFile2.html ...');
 		    phantom.exit();
 		    return;
 		}
@@ -791,7 +820,10 @@
 	    
 	    SJTest.waitFor(SJTest4Phantom.isDoneTopLevel,
 	    	function() {
-		    	var p = SJTest.passed.length, f = SJTest.failed.length, s = SJTest.skipped.length;
+		    	var p = SJTest4Phantom.passed.length, f = SJTest4Phantom.failed.length, s = SJTest4Phantom.skipped.length;
+		    	console.log("");
+		    	console.log(SJTest.LOGTAG, "Passed: "+SJTest4Phantom.passed);
+		    	console.log(SJTest.LOGTAG, "Failed: "+SJTest4Phantom.failed);
 		    	console.log("");
 		    	console.log(SJTest.LOGTAG, "Tests: "+(p+s+f)+"\tPassed: "+p+"\tSkipped: "+s+"\tFailed: "+f);
 		    	if (f==0) console.log(SJTest.LOGTAG, ":)");
