@@ -38,14 +38,46 @@
 
           <h3>Get Started: Hello World</h3>
 
-			Tests are defined and run within a normal html page, just like any other javascript.
+		<p>Tests are defined and run within a normal html page, just like any other javascript. Here is a simple example:</p>
+<pre><code>
+&lt;html>
+	&lt;head>
+		&lt;!-- You don't need jQuery or Bootstrap, but if they're present, we use them for nicer output. -->
+		&lt;link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+		&lt;script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js">&lt;/script>
+		&lt;script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js">&lt;/script>
+
+		<!-- SJTest.js (please download your own copy) -->
+		&lt;script src='https://rawgithub.com/winterstein/SJTest/master/SJTest.min.js'></script>
+	&lt;/head>
+	&lt;body>
+		&lt;script>
+			
+			SJTest.run({name:'HelloWorld',
+
+				easyTest: function() {
+					assert(1+1 == 2);
+				},
+
+				failingTest: function() {
+					assert(false, "Well that was never going to work");						
+				}
+
+			});
+	
+		&lt;/script>
+	&lt;/body>
+&lt;/html>
+</code></pre>		
+			
+			<p></p>Try it now: <a href='HelloWorld.html?SJTest=on'>HelloWorld.html?SJTest=on</a></p>
 
 		  <h3>Documentation: Running Tests</h3>
 
 			<h4>In a browser</h4>		
 			IMPORTANT: by default, SJTest <i>does nothing</i> in the browser. You must switch it on, 
-			either by adding SJTest=on to the url, or in the page with <pre><code><script>SJTest.on = true;</script></code></pre><br>
-			This is so that
+			either by adding SJTest=on to the url, or in the page with <pre><code>&lt;script&gt;SJTest.on = true;&lt;/script&gt;</code></pre><br>
+			This is so that SJTest can be deployed as part of production code.
 			
 			<p>Then just view your html page in any modern browser</p>
 
