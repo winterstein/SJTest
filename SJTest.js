@@ -550,11 +550,12 @@
 				console.log('runScript Done', url);
 				SJTest._scriptsInProcessing.removeValue(url);
 				if (after) after(); 
-			}); // TODO .fail()
-	// function() {
-	// //if (SJTest.on) SJTest.runq();
-	// if (after) after();
-	// });
+			}, 
+			/* fail function */ function() {
+				SJTest.runTest("runScript", function(){
+					throw "Could not load "+url+". See console for details.";
+				});
+			});
 		};
 		
 	
@@ -670,22 +671,23 @@
 		
 				
 		/**
-		 * url {string}, callback {function}
+		 * url {string}, callback {function}, fail {?Function} Only supported with jQuery
 		 */
-		if (window.$ && $.getScript) {
-			// jQuery :)
-			SJTestUtils.load = $.getScript;		
-		} else {	
-			SJTestUtils.load = function(url, callback) {
-				console.log("loading...", url);
-				var oHead = document.getElementsByTagName('head')[0];
-				var oScript = document.createElement('script');
-				oScript.type = 'text/javascript';
-				oScript.src = url;
-				oScript.onload = callback;
-				oHead.appendChild(oScript);
-			};
-		} // load()
+		SJTestUtils.load = function(url, callback, onFail) {
+			console.log(SJTest.LOGTAG, "loading...", url);
+			if (window.$ && $.getScript) {
+				// Use jQuery if we can
+				var gs = $.getScript(url, callback);
+				if (onFail) gs.fail(onFail);
+				return;
+			}
+			var oHead = document.getElementsByTagName('head')[0];
+			var oScript = document.createElement('script');
+			oScript.type = 'text/javascript';
+			oScript.src = url;
+			oScript.onload = callback;
+			oHead.appendChild(oScript);
+		};// load()
 		
 		/**
 		 * @param fn {function} Run once the document is loaded.
