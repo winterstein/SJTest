@@ -86,8 +86,7 @@
 			
 			// waitFor?			
 			var atest = this;
-			var testDoneFn = function(yes) {
-				console.log("ATest.this", atest);
+			var testDoneFn = function(yes) {				
 				atest.status = 'pass';
 	//			SJTest.passed.push(atest);
 				if (yes !== true) atest.details = yes;
@@ -96,7 +95,7 @@
 			}; 					
 			
 			var timeoutFn = function() {
-				console.log("TIMEOUT ATest.this", atest);				
+				//console.log("TIMEOUT ATest.this", atest);				
 				atest.error = new Error("Timeout");
 				atest.status = 'fail';
 				//SJTest.failed.push(atest);
@@ -186,7 +185,11 @@
 	 * 
 	 */
 	SJTest.run = function(testSet) {
-		console.log("SJTest.run");
+		if ( ! SJTest.on) {
+			console.log(SJTest.LOGTAG, "NO run", testSet);
+			return;		
+		}
+		console.log(SJTest.LOGTAG, "run", testSet);
 		assert(typeof testSet === 'object', testSet);
 		var setName = testSet.name || false;
 		for(var tName in testSet) {
@@ -209,11 +212,11 @@
 	 * @returns {Boolean} true if all tests are run, and minTime has expired
 	 */
 	SJTest.isDone = function() {
-		console.log("isDone?");
+		//console.log("isDone?");
 		assert( ! SJTest.phantomjsTopLevel);
 		if (SJTest.wait) return false;		
 		if (new Date().getTime() < SJTest._started + SJTest.minTime) {
-			console.log("Wait!");
+			//console.log("Wait!");
 			return false;
 		}
 		// Any running tests?
@@ -221,7 +224,7 @@
 			var test = SJTest.tests[i];
 			if (test.status==='running...') return false;
 		}
-		console.log("isDone! ", SJTest.tests.length);
+		//console.log("isDone! ", SJTest.tests.length);
 		return true;
 	};
 		
@@ -240,11 +243,11 @@
 	 *            seconds)
 	 */
 	SJTest.runTest = function(testName, testFn, waitForThis, timeout) {
-		console.log("SJTest.runTest", testName);
 		if ( ! SJTest.on) {
-			console.log("SJTest.runTest"+testName+" NOT!");
+			console.log(SJTest.LOGTAG, "NO runTest", testName);
 			return;		
 		}
+		console.log(SJTest.LOGTAG, "runTest", testName);
 		var dtest = false;
 		if (testFn) {
 			dtest = new ATest(testName, testFn);
@@ -309,10 +312,10 @@
 	 */
 	SJTest.display = function() {
 			if ( ! SJTest.on) {
-				console.log(SJTest.LOGTAG, "Not on = no display");
+				//console.log(SJTest.LOGTAG, "Not on = no display");
 				return;
 			}	
-			console.log(SJTest.LOGTAG, "Display!");
+			//console.log(SJTest.LOGTAG, "Display!");
 			var good=0,total=SJTest.tests.length;
 			for(var i=0; i<SJTest.tests.length; i++) {
 				var test = SJTest.tests[i];
@@ -549,10 +552,10 @@
 	
 	SJTest.runScript = function(url, after) {
 			if ( ! SJTest.on) return;
-			console.log('runScript', url);
+			console.log(SJTest.LOGTAG, 'runScript', url);
 			SJTest._scriptsInProcessing.push(url);
 			SJTestUtils.load(url, function() {
-				console.log('runScript Loaded And Done', url);
+				//console.log('runScript Loaded And Done', url);
 				SJTest._scriptsInProcessing.removeValue(url);
 				if (after) after(); 
 			}, 
