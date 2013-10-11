@@ -929,24 +929,24 @@
 	
 
 	SJTest4Phantom.isDoneTopLevel = function() {
-		console.log("isDoneTopLevel?");
+		//console.log("isDoneTopLevel?");
 		assert(SJTest.phantomjsTopLevel);
 		// Are the pages done?
 		for(var i=0; i<SJTest4Phantom._pagesInProcessing.length; i++) {
 			var page = SJTest4Phantom._pagesInProcessing[i];
 			var done = page.evaluate(function() {return SJTest.isDone();});
-			console.log(SJTest.phantomjsTopLevel+" "+page.url+" done "+done);
+			//console.log(SJTest.phantomjsTopLevel+" "+page.url+" done "+done);
 			if (done) {
-				console.log("Remove page!",page);
+				//console.log("Remove page!",page);
 				SJTest4Phantom._pagesInProcessing.removeValue(page);
 				try {page.close();} catch(err) {}
 			}			
 		}
 		if (SJTest4Phantom._pagesToLoad.length > 0 || SJTest4Phantom._pagesInProcessing.length > 0) {
-			console.log("Q", SJTest4Phantom._pagesToLoad, "Pages", SJTest4Phantom._pagesInProcessing);
+			//console.log("Q", SJTest4Phantom._pagesToLoad, "Pages", SJTest4Phantom._pagesInProcessing);
 			return false;
 		}
-		console.log("DoneTopLevel!");
+		//console.log("DoneTopLevel!");
 		return true;
 	};
 	
