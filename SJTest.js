@@ -315,14 +315,14 @@
 				var test = SJTest.tests[i];
 				if (test.status==='pass') good++;
 			}		
-			SJTest._displayPanel = $("#SJTestDisplay"); // TODO factor jquery into polyfill
-			if (SJTest._displayPanel.length==0) {
+			SJTest._displayPanel = SJTestUtils.$getById("SJTestDisplay");
+			if ( ! SJTest._displayPanel || ! SJTest._displayPanel.length) {
 				//console.log(SJTest.LOGTAG, "Display Make it!");
-				SJTest._displayPanel = $(
+				SJTest._displayPanel = SJTestUtils.$create(
 						"<div id='SJTestDisplay' "
 						+(SJTest.styling? "style='position:fixed;top:0px;right:0px;width:70%;overflow:auto;max-height:100%;'" : '')
 						+" class='SJTest panel panel-default'></div>");
-				$('body').append(SJTest._displayPanel);
+				SJTestUtils.$(document.body).append(SJTest._displayPanel);
 			} else {
 				// clear out old
 				SJTest._displayPanel.html("");
@@ -330,10 +330,10 @@
 			// Header
 			SJTest._displayPanel.append("<div class='panel-heading'><h2 class='panel-title'>"
 					+"Test Results: <span class='good'>"+good+"</span> / <span class='total'>"+total+"</span>"
-					+"<button type='button' "+(SJTest.styling? "style='float:right;'":'')+" class='close' aria-hidden='true' onclick=\"$('#SJTestDisplay').remove();\">&times;</button>"
+					+"<button title='Close Tests' type='button' "+(SJTest.styling? "style='float:right;'":'')+" class='close' aria-hidden='true' onclick=\"$('#SJTestDisplay').remove();\">&times;</button>"
 					+"</h2></div>");
 			
-			SJTest._displayTable = $("<table class='table table-bordered'></table>");
+			SJTest._displayTable = SJTestUtils.$create("<table class='table table-bordered'></table>");
 			SJTest._displayTable.append("<tr><th></th><th>Name</th><th>Result</th><th>Details</th><th>Stack</th></tr>");
 			SJTest._displayPanel.append(SJTest._displayTable);
 			for(var i=0; i<SJTest.tests.length; i++) {
@@ -351,18 +351,19 @@
 		assertArgs(test, ATest);
 		// Name includes a repeat button
 		var trid = "tr_SJTest_"+test._id;
-		var tr = $('#'+trid);
-		if ( ! tr.length) {
-			tr = $("<tr id='"+trid+"'></tr>");
+		var tr = SJTestUtils.$getById(trid);
+		if (!tr || ! tr.length) {
+			tr = SJTestUtils.$create("<tr id='"+trid+"'></tr>");
+			assert(tr);
 			SJTest._displayTable.append(tr);
 			//console.log('make it', trid);
 		} //else console.log('got it',trid);
 		if (SJTest.styling) {
 			var col = test.status=='pass'? '#9f9' : test.status=='skip'? '#ccf' : test.status=='running...'? '#fff' : '#f99';			
-			$(tr).css({border:'1px solid #333', 'background-color':col});
+			tr.css({border:'1px solid #333', 'background-color':col});
 		}
 				
-		$(tr).html("<td><a href='#' onclick='SJTest.runTest(\""+test.name+"\"); return false;'><span class='glyphicon glyphicon-repeat'></span></a></td><td>"
+		tr.html("<td><a href='#' title='Re-run this test' onclick='SJTest.runTest(\""+test.name+"\"); return false;'>&#8635;</a></td><td>"
 				+test.name
 				+"</td><td>"+test.status+"</td><td>"+(test.error || SJTestUtils.str(test.details) || '-')+"</td><td>"
 				+(test.stack || '-')+"</td>");
@@ -372,9 +373,11 @@
 		for(var i=0; i<SJTest.tests.length; i++) {
 			var test = SJTest.tests[i];
 			if (test.status==='pass') good++;
-		}		
-		$("span.good", SJTest._displayPanel).text(good);
-		$("span.total", SJTest._displayPanel).text(total);
+		}
+		if (window.$) {
+			$("span.good", SJTest._displayPanel).text(good);
+			$("span.total", SJTest._displayPanel).text(total);
+		} // TODO non-jQuery
 	};
 		
 	/**
@@ -725,6 +728,55 @@
 				}				
 			};
 		}	// str()
+		
+		SJTestUtils.$ = function(thing) {
+			if ( ! thing) return thing;
+			if (window.$) return $(thing);
+			var $thing = {"$el": thing};
+			$thing.append = function(child) {
+				assert(child);
+				console.log("append", thing, child);
+				return SJTestUtils.$append(thing, child);		
+			};
+			$thing.html = function(html) {
+				if (html !== undefined) thing.innerHTML = html;
+				return thing.innerHTML;
+			};
+			$thing.length = 1;
+			$thing.css = function(){};
+			return $thing;
+		};
+		
+		SJTestUtils.$getById = function(id) {
+			if (window.$) return $('#'+id);
+			assert(id);
+			return SJTestUtils.$(document.getElementById(id));
+		};
+		
+		SJTestUtils.$create = function(html) {
+			if (window.$) return $(html);
+			assert(html);
+			console.log("$create", html);
+			var el = document.createElement('div');
+			el.innerHTML = html;
+			var el2 = el.childNodes && el.childNodes[0]? el.childNodes[0] : el;
+			assert(el2, el);
+			return SJTestUtils.$(el2);
+		};
+		
+		SJTestUtils.$append = function(element, child) {
+			if (window.$) return $(element).append(child);
+			assert(element);
+			assert(child);
+			if (typeof child === 'string') {
+				child = SJTestUtils.$create(child);	
+				assert(child);
+			}
+			if (child.$el) child = child.$el;
+			assert(child);
+			console.log("$append", element, child);
+			element.appendChild(child);
+		};
 		
 		
 		// Make SJTest functions global??
