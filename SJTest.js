@@ -149,7 +149,9 @@
 		/** Is testing on? Set to true/false to activate/deactivate SJTest */
 	SJTest.on = false;
 	
-	/** true by default: Expose SJTest.assert() as global functions -- plus assertArgs(), isa(), and match()*/
+	/** true by default: Expose SJTest.assert() as a global function
+	 *  -- plus assertArgs(), isa(), waitFor(), match() 
+	 */
 	SJTest.expose = true;
 
 	/**
@@ -575,6 +577,8 @@
 	@param callback {function} Called once condition is true.
 	@param timeout {?Number} Max time in milliseconds. If unset: wait indefinitely.
 	@param onTimeout {?function} Called if timeout occurs.
+	
+	@returns TODO a promise, so you can do waitFor(X).then(Y)
 	 * 
 	 */
 	SJTest.waitFor = function(condition, callback, timeout, onTimeout) {
@@ -796,6 +800,9 @@
 			if ( ! window.match) {
 				window.match = SJTest.match;
 			}
+			if ( ! window.waitFor) {
+				window.waitFor = SJTest.waitFor;
+			}	
 			// attest = assert (useful if assert is already occupied) HM Bit confusing though to have 2 equiv functions
 			//if ( ! window.attest) {
 			//	window.attest = SJTest.assert;

@@ -44,7 +44,7 @@ Or from the command line, use PhantomJS to automate your testing:
 
 	phantomjs SJTest.js HelloWorld.html
 
-There -- you're ready to write and run tests! BUT SJTest has plenty of other useful features...
+That's it -- All you need to write and run tests! BUT SJTest has plenty of other useful features...
 
 See the [Project page](http://winterstein.github.io/SJTest/), or the code, for more details.
 
