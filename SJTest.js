@@ -73,8 +73,11 @@
 			window.reportError = function(err){throw err;};			
 			this.status = 'running...';
 			console.log(SJTest.LOGTAG, this.name, this.status);
+			
 			// Run test!
-			this.details = this.fn();
+			// NB: Pass in the ATest for reflection, though almost all tests will ignore it.
+			this.details = this.fn(this);
+			
 			// wait for async test?
 			if ( ! waitForThis) {
 				this.status = 'pass';
@@ -320,7 +323,7 @@
 				//console.log(SJTest.LOGTAG, "Display Make it!");
 				SJTest._displayPanel = SJTestUtils.$create(
 						"<div id='SJTestDisplay' "
-						+(SJTest.styling? "style='position:fixed;top:0px;right:0px;width:70%;overflow:auto;max-height:100%;'" : '')
+						+(SJTest.styling? "style='z-index:100000;background:white;border:2px solid black;position:fixed;top:0px;right:0px;width:70%;overflow:auto;max-height:100%;'" : '')
 						+" class='SJTest panel panel-default'></div>");
 				SJTestUtils.$(document.body).append(SJTest._displayPanel);
 			} else {
@@ -549,12 +552,13 @@
 			console.log('runScript', url);
 			SJTest._scriptsInProcessing.push(url);
 			SJTestUtils.load(url, function() {
-				console.log('runScript Done', url);
+				console.log('runScript Loaded And Done', url);
 				SJTest._scriptsInProcessing.removeValue(url);
 				if (after) after(); 
 			}, 
-			/* fail function */ function() {
-				SJTest.runTest("runScript", function(){
+			/* fail function */ function(err) {
+				SJTest.runTest("runScript", function() {
+					console.error(SJTest.LOGTAG,url,err);
 					throw "Could not load "+url+". See console for details.";
 				});
 			});
@@ -623,6 +627,7 @@
 	 * @param timeout {?Number} Milliseconds. Defaults to 10,000 (10 seconds)
 	 */
 	SJTest.expectTests = function(n, timeout) {
+		if ( ! SJTest.on) return;
 		assert( ! SJTest._expectTests, "Already expecting "+SJTest._expectTests+" "+n);
 		// Store n for possible reflection
 		SJTest._expectTests = n;
@@ -676,9 +681,10 @@
 		 * url {string}, callback {function}, fail {?Function} Only supported with jQuery
 		 */
 		SJTestUtils.load = function(url, callback, onFail) {
-			console.log(SJTest.LOGTAG, "loading...", url);
+			console.log(SJTest.LOGTAG, "loading...", url, callback);
 			if (window.$ && $.getScript) {
 				// Use jQuery if we can
+				console.log(SJTest.LOGTAG, "load by jQuery...", url, callback);
 				var gs = $.getScript(url, callback);
 				if (onFail) gs.fail(onFail);
 				return;
@@ -734,7 +740,7 @@
 			var $thing = {"$el": thing};
 			$thing.append = function(child) {
 				assert(child);
-				console.log("append", thing, child);
+				//console.log("append", thing, child);
 				return SJTestUtils.$append(thing, child);		
 			};
 			$thing.html = function(html) {
@@ -755,7 +761,7 @@
 		SJTestUtils.$create = function(html) {
 			if (window.$) return $(html);
 			assert(html);
-			console.log("$create", html);
+			//console.log("$create", html);
 			var el = document.createElement('div');
 			el.innerHTML = html;
 			var el2 = el.childNodes && el.childNodes[0]? el.childNodes[0] : el;
@@ -804,6 +810,8 @@
 				window.str = SJTestUtils.str;
 			}		
 		}
+		
+		// Run a script from a url request? No, it'd be a security hole :(
 	}; // ./ init
 	
 	
