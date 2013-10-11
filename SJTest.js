@@ -608,13 +608,25 @@
 	};
 	
 	/**
-	 * TODO How many tests should we see? If less than this, then not done
+	 * How many tests should we see? If less than this, then the page's tests are not yet done.
+	 * Use-case: for async / delayed tests, to make sure they aren't skipped.
+	 * 
+	 * This is itself a test (so you can see it pass/fail) -- but it is _not_ counted as one of the n.
+	 * 
+	 * Note: Currently, this can only be called once per page.
+	 * 
+	 * @param n {Number} How many tests does this page have? 
+	 * (excludes the expectTests one which this call will make)
+	 * @param timeout {?Number} Milliseconds. Defaults to 10,000 (10 seconds)
 	 */
 	SJTest.expectTests = function(n, timeout) {
+		assert( ! SJTest._expectTests, "Already expecting "+SJTest._expectTests+" "+n);
+		// Store n for possible reflection
 		SJTest._expectTests = n;
-		SJTest.runTest("expectTests", 
+		if ( ! timeout) timeout = 10000;
+		SJTest.runTest("expectTests_"+n, 
 				function(){}, 
-				function(){return SJTest.tests.length >= n;}, timeout);
+				function(){return SJTest.tests.length > n;}, timeout);
 	};
 	
 	

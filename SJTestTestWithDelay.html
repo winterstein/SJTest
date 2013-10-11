@@ -18,6 +18,9 @@
 <script>
 console.log("RANNING?!");
 
+// How many tests are on this page?
+SJTest.expectTests(4);
+
 $(function() {
 	SJTest.run({name:'WithDelay',
 		AfterPageLoad: function() {
@@ -26,13 +29,14 @@ $(function() {
 	});	
 });
 
+// A test which is only created 1 second after page load
 setTimeout(function(){
 	SJTest.run({name:'WithDelay',
-		SmallTimeout: function() {
+		DelayedStartTest: function() {
 			return "All Good :)";
 		}
 	});
-}, 5);
+}, 1000);
 
 var done = new Date().getTime()+2000;
 SJTest.runTest(
