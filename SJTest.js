@@ -334,7 +334,7 @@
 					+"</h2></div>");
 			
 			SJTest._displayTable = SJTestUtils.$create("<table class='table table-bordered'></table>");
-			SJTest._displayTable.append("<tr><th></th><th>Name</th><th>Result</th><th>Details</th><th>Stack</th></tr>");
+			SJTest._displayTable.append("<tr><th></th><th>Name</th><th>Result</th><th>Details / Stack</th></tr>");
 			SJTest._displayPanel.append(SJTest._displayTable);
 			for(var i=0; i<SJTest.tests.length; i++) {
 				var test = SJTest.tests[i];
@@ -365,8 +365,8 @@
 				
 		tr.html("<td><a href='#' title='Re-run this test' onclick='SJTest.runTest(\""+test.name+"\"); return false;'>&#8635;</a></td><td>"
 				+test.name
-				+"</td><td>"+test.status+"</td><td>"+(test.error || SJTestUtils.str(test.details) || '-')+"</td><td>"
-				+(test.stack || '-')+"</td>");
+				+"</td><td>"+test.status+"</td><td>"+(test.error || SJTestUtils.str(test.details) || '-')
+				+" "+(test.stack || '')+"</td>");
 				
 		// update scores
 		var good=0,total=SJTest.tests.length;
