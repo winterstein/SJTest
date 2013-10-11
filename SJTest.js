@@ -329,7 +329,7 @@
 			}
 			// Header
 			SJTest._displayPanel.append("<div class='panel-heading'><h2 class='panel-title'>"
-					+"Test Results: <span class='good'>"+good+"</span> / <span class='total'>"+total+"</span>"
+					+"Test Results: <span id='_SJTestGood'>"+good+"</span> / <span id='_SJTestTotal'>"+total+"</span>"
 					+"<button title='Close Tests' type='button' "+(SJTest.styling? "style='float:right;'":'')+" class='close' aria-hidden='true' onclick=\"$('#SJTestDisplay').remove();\">&times;</button>"
 					+"</h2></div>");
 			
@@ -374,10 +374,9 @@
 			var test = SJTest.tests[i];
 			if (test.status==='pass') good++;
 		}
-		if (window.$) {
-			$("span.good", SJTest._displayPanel).text(good);
-			$("span.total", SJTest._displayPanel).text(total);
-		} // TODO non-jQuery
+		
+		SJTestUtils.$getById('_SJTestGood').html(''+good);
+		SJTestUtils.$getById('_SJTestTotal').html(''+total);
 	};
 		
 	/**
