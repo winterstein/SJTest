@@ -232,16 +232,16 @@
 		
 	/**
 	 * @param testName
-	 *            {!string}
+	 *            {!String}
 	 * @param testFn
-	 *            {!function}
+	 *            {?Function} If null, look for a test by this name.
 	 * @param waitFor
-	 *            {?function} A check for test-success which will be run
+	 *            {?Function} A check for test-success which will be run
 	 *            periodically. Returns true when done (or a String, which
 	 *            will be reported as the test-details). Throw an error if
 	 *            the test fails.
 	 * @param timeout
-	 *            {?number} max milliseconds to allow. Default to 5000 (5
+	 *            {?Number} max milliseconds to allow. Default to 5000 (5
 	 *            seconds)
 	 */
 	SJTest.runTest = function(testName, testFn, waitForThis, timeout) {
@@ -249,16 +249,21 @@
 			console.log(SJTest.LOGTAG, "NO runTest", testName);
 			return;		
 		}
+		assertMatch(testName, String, testFn, "?Function", waitForThis, "?Function", timeout, "?Number");
 		console.log(SJTest.LOGTAG, "runTest", testName);
 		var dtest = false;
 		if (testFn) {
 			dtest = new ATest(testName, testFn);
+			dtest.waitForThis = waitForThis;
+			dtest.timeout = timeout;
 		} else {
 			// look for a test by name
 			for(var i=0; i<SJTest.tests.length; i++) {
 				var test = SJTest.tests[i];
 				if (test.name === testName) {
 					dtest = test;
+					waitForThis = dtest.waitForThis;
+					timeout = dtest.timeout;
 					break;
 				}
 			}
@@ -287,8 +292,6 @@
 		}
 			
 		SJTest.tests.push(dtest);
-		
-		SJTest.current = dtest;
 		// run!
 		if (!skip) {
 			// TODO show running... if (SJTest._displayTable)
@@ -305,7 +308,6 @@
 		}
 		// display now?
 		if (SJTest._displayTable) SJTest._displayTest(dtest);
-		SJTest.current = null;				
 	}; // runTestASync()
 	
 		
@@ -313,42 +315,42 @@
 	 * 
 	 */
 	SJTest.display = function() {
-			if ( ! SJTest.on) {
-				//console.log(SJTest.LOGTAG, "Not on = no display");
-				return;
-			}	
-			//console.log(SJTest.LOGTAG, "Display!");
-			var good=0,total=SJTest.tests.length;
-			for(var i=0; i<SJTest.tests.length; i++) {
-				var test = SJTest.tests[i];
-				if (test.status==='pass') good++;
-			}		
-			SJTest._displayPanel = SJTestUtils.$getById("SJTestDisplay");
-			if ( ! SJTest._displayPanel || ! SJTest._displayPanel.length) {
-				//console.log(SJTest.LOGTAG, "Display Make it!");
-				SJTest._displayPanel = SJTestUtils.$create(
-						"<div id='SJTestDisplay' "
-						+(SJTest.styling? "style='z-index:100000;background:white;border:2px solid black;position:fixed;top:0px;right:0px;width:70%;overflow:auto;max-height:100%;'" : '')
-						+" class='SJTest panel panel-default'></div>");
-				SJTestUtils.$(document.body).append(SJTest._displayPanel);
-			} else {
-				// clear out old
-				SJTest._displayPanel.html("");
-			}
-			// Header
-			SJTest._displayPanel.append("<div class='panel-heading'><h2 class='panel-title'>"
-					+"Test Results: <span id='_SJTestGood'>"+good+"</span> / <span id='_SJTestTotal'>"+total+"</span>"
-					+"<button title='Close Tests' type='button' "+(SJTest.styling? "style='float:right;'":'')+" class='close' aria-hidden='true' onclick=\"$('#SJTestDisplay').remove();\">&times;</button>"
-					+"</h2></div>");
-			
-			SJTest._displayTable = SJTestUtils.$create("<table class='table table-bordered'></table>");
-			SJTest._displayTable.append("<tr><th></th><th>Name</th><th>Result</th><th>Details / Stack</th></tr>");
-			SJTest._displayPanel.append(SJTest._displayTable);
-			for(var i=0; i<SJTest.tests.length; i++) {
-				var test = SJTest.tests[i];
-				SJTest._displayTest(test);				
-			}		
-		}; // display()
+		if ( ! SJTest.on) {
+			//console.log(SJTest.LOGTAG, "Not on = no display");
+			return;
+		}	
+		//console.log(SJTest.LOGTAG, "Display!");
+		var good=0,total=SJTest.tests.length;
+		for(var i=0; i<SJTest.tests.length; i++) {
+			var test = SJTest.tests[i];
+			if (test.status==='pass') good++;
+		}		
+		SJTest._displayPanel = SJTestUtils.$getById("SJTestDisplay");
+		if ( ! SJTest._displayPanel || ! SJTest._displayPanel.length) {
+			//console.log(SJTest.LOGTAG, "Display Make it!");
+			SJTest._displayPanel = SJTestUtils.$create(
+					"<div id='SJTestDisplay' "
+					+(SJTest.styling? "style='z-index:100000;background:white;border:2px solid black;position:fixed;top:0px;right:0px;width:70%;overflow:auto;max-height:100%;'" : '')
+					+" class='SJTest panel panel-default'></div>");
+			SJTestUtils.$(document.body).append(SJTest._displayPanel);
+		} else {
+			// clear out old
+			SJTest._displayPanel.html("");
+		}
+		// Header
+		SJTest._displayPanel.append("<div class='panel-heading'><h2 class='panel-title'>"
+				+"Test Results: <span id='_SJTestGood'>"+good+"</span> / <span id='_SJTestTotal'>"+total+"</span>"
+				+"<button title='Close Tests' type='button' "+(SJTest.styling? "style='float:right;'":'')+" class='close' aria-hidden='true' onclick=\"$('#SJTestDisplay').remove();\">&times;</button>"
+				+"</h2></div>");
+		
+		SJTest._displayTable = SJTestUtils.$create("<table class='table table-bordered'></table>");
+		SJTest._displayTable.append("<tr><th></th><th>Name</th><th>Result</th><th>Details / Stack</th></tr>");
+		SJTest._displayPanel.append(SJTest._displayTable);
+		for(var i=0; i<SJTest.tests.length; i++) {
+			var test = SJTest.tests[i];
+			SJTest._displayTest(test);				
+		}		
+	}; // display()
 		
 	/**
 	 * Add a row to the display table
@@ -356,7 +358,7 @@
 	 * @param test {ATest}
 	 */
 	SJTest._displayTest = function(test) {
-		assertArgs(test, ATest);
+		assertMatch(test, ATest);
 		// Name includes a repeat button
 		var trid = "tr_SJTest_"+test._id;
 		var tr = SJTestUtils.$getById(trid);
