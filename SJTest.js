@@ -404,11 +404,12 @@
 	};
 
 	/**
+	 * @deprecated Use SJTest.assertMatch() instead
 	 * Call with alternating parameter, pattern pairs.
 	 * E.g. assertArgs(myNumericParam, Number)
 	 * @throws Error if an argument does not match
 	 */
-	SJTest.assertArgs = function() {		
+	SJTest.assertArgs = function() {
 		assert(arguments.length % 2 == 0, arguments);
 		for(var i=0; i<arguments.length; i+=2) {
 			var v = arguments[i];
@@ -424,9 +425,16 @@
 	/**
 	 * Convenience for assert(match(value, matcher), value+" !~ "+matcher);
 	 * Because it's a common use case.
+	 * Arguments are alternating [airs of value, matcher (as many pairs as you like).
+	 * E.g. assertMatch(myNumericValue, Number); or assertMatch(myNumericValue, Number, specificStringValue, "foo|bar");
 	 */
-	SJTest.assertMatch = function(value, matcher) {
-		assert(match(value, matcher), value+" !~ "+matcher);
+	SJTest.assertMatch = function() {
+		SJTest.assert(arguments.length % 2 == 0, arguments);
+		for(var i=0; i<arguments.length; i+=2) {
+			var v = arguments[i];
+			var m = arguments[i+1];
+			SJTest.assert(SJTest.match(v, m), (arguments.length>2? ((i/2)+1)+') ':'')+ v +" !~ "+m);
+		}
 	};
 	
 	/**
@@ -469,19 +477,19 @@
 			if (matcher[0] === '?' && (value===null || value===undefined)) {
 				return true;
 			}
-			// Get the class function
+			// Get the class function(s)
 			var ms = matcher.split("|");
 			for(var mi=0; mi<ms.length; mi++) {
-				var m = ms[mi].match(/^\??(\w+?)!?$/);
-				if ( ! m) break;
+				var mArr = ms[mi].match(/^\??(\w+?)!?$/);
+				if ( ! mArr) break;
+				var m = mArr[1];
+				if (sValue===m) return true;
 				try {
 					var fn = new Function("return "+m);
 					var klass = fn();
 					if (SJTest.isa(value, klass)) {
 						return true;
-					} else {
-						return false;
-					}				
+					}
 				} catch(err) {
 					// oh well??
 				}				
@@ -552,6 +560,10 @@
 	
 	SJTest._scriptsInProcessing = [];
 	
+	/**
+	 * @param url {String} Can be absolute or relative to the page.
+	 * @param after {?Function} Optional callback to run after loading.
+	 */
 	SJTest.runScript = function(url, after) {
 			if ( ! SJTest.on) return;
 			console.log(SJTest.LOGTAG, 'runScript', url);
@@ -570,6 +582,18 @@
 		};
 		
 	
+
+		/**
+		 * TODO use SJTest=url to call runScript()
+		 * 
+		 * Note: Limited to relative urls for security. This may still have
+		 * security implications (if you call this, you allow a malicious link
+		 * to run arbitrary scripts from the same domain in the page -- so do not 
+		 * use if an attacker could place a script onto the same domain, or abuse
+		 * one of yours).
+		 */
+		SJTest.runScriptFromUrl = function() {
+		};
 
 		/**
 		 * Waitfor, adapted from http://blog.jeffscudder.com/2012/07/waitfor-javascript.html

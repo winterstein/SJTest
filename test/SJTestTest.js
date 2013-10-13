@@ -18,10 +18,27 @@ var SJTestTest = {
 	
 	"match-class": function() {
 		SJTest.assert(SJTest.match(1, Number), 1);
+		SJTest.assertMatch(0, "Number");
 		SJTest.assert(SJTest.match("a", String), "a");
 		SJTest.assert( ! SJTest.match(1, String), "- 1");
 		SJTest.assert( ! SJTest.match("a", Number), "- a");
 	},
+	
+	"match-classJSDoc?": function() {
+		SJTest.assertMatch(null, "?Number");
+		SJTest.assertMatch(1, "?Number");
+		SJTest.assertMatch(0, "?Number");		
+	},
+	
+	"match-classJSDoc|": function() {
+		SJTest.assertMatch(1, "Number|String");
+		SJTest.assertMatch(0, "Number|String");
+		SJTest.assertMatch('foo', "Number|String");
+		SJTest.assertMatch('', "Number|String");
+		
+		SJTest.assertMatch('foo', "foo|bar");
+	},
+	
 	
 	"match-bool": function() {
 		SJTest.assert(SJTest.match(true, Boolean), true);
