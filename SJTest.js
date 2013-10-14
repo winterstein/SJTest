@@ -587,8 +587,9 @@
 		 * use if an attacker could place a script onto the same domain, or abuse
 		 * one of yours.
 		 */
-		SJTest.runScriptFromUrl = function() {
-			var script = SJTest._scriptFromUrl; 
+		SJTest.runScriptFromUrl = function() {			
+			var script = SJTest._scriptFromUrl;
+			console.log(SJTest.LOGTAG, "runScriptFromUrl: "+script);
 			if ( ! script) return;
 			if ( ! SJTest.on) {
 				 // Not on!
