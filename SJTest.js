@@ -159,9 +159,19 @@
 	 * Set by the url parameter SJTest=1, or it can be explicitly set in javascript.
 	 * NB: Even when off, SJTest will still define some functions, e.g. assertArgs() & isa().
 	 */
-	SJTest.on = (""+window.location).match(/SJTest=(1|true|on)/)? true : false;
-	console.log("location", ""+window.location+" on? "+SJTest.on);
-	
+	{
+		console.log("location", ""+window.location+" on? "+SJTest.on);
+		var sjon = (""+window.location).match(/SJTest=([^&]+)/);
+		if ( ! sjon || sjon[1].match(/off/)) {
+			SJTest.on = false;			
+		} else {
+			SJTest.on = true;
+			// A script url? See SJTest.runScriptFromUrl()
+			if ( ! sjon[1].match(/on/)) {
+				SJTest._scriptFromUrl = sjon[1]; 
+			}
+		}
+	}	
 	
 		// Focus on certain tests?
 	SJTest.skip = [];
@@ -586,15 +596,29 @@
 	
 
 		/**
-		 * TODO use SJTest=url to call runScript()
-		 * 
-		 * Note: Limited to relative urls for security. This may still have
-		 * security implications (if you call this, you allow a malicious link
-		 * to run arbitrary scripts from the same domain in the page -- so do not 
+		 * Use with SJTest=PathToMyScript in the page url. 
+		 * Call this to run a script (if there is one) specified by SJTest=path in the url parameters.
+		 * <p>
+		 * Note: This is restricted to relative urls for security. This may still have
+		 * security implications. If you call this, you allow a potentially malicious link
+		 * to run arbitrary scripts from the same domain in the page. So do not 
 		 * use if an attacker could place a script onto the same domain, or abuse
-		 * one of yours).
+		 * one of yours.
 		 */
 		SJTest.runScriptFromUrl = function() {
+			var script = SJTest._scriptFromUrl; 
+			if ( ! script) return;
+			if ( ! SJTest.on) {
+				 // Not on!
+				console.log(SJTest.LOGTAG, "NOT on, so not running script "+script);
+				return;
+			}			
+			// Security check: must be a relative url
+			if (script.indexOf('//') != -1) {
+				console.warn(SJTest.LOGTAG, "For security, you cannot run cross-domain test scripts.");
+				return;
+			}
+			SJTest.runScript(script);
 		};
 
 		/**
