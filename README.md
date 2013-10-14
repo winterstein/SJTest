@@ -15,7 +15,7 @@
 			<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
 
 			<!-- SJTest.js -->
-			<script src='https://raw.github.com/winterstein/SJTest/master/SJTest.min.js'></script>
+		<script src='https://rawgithub.com/winterstein/SJTest/master/SJTest.min.js'></script>
 		</head>
 		<body>
 			<script>
@@ -39,13 +39,13 @@
 Load this page in a browser -- adding `SJTest=on` to the url -- and you'll see this:
 
 
-[Try it now](TODO)
+[Try it now](http://winterstein.github.io/SJTest/HelloWorld.html?SJTest=on)
 
 Or from the command line, use PhantomJS to automate your testing:
 
 	phantomjs SJTest.js HelloWorld.html
 
-There -- you're ready to write and run tests! BUT SJTest has plenty of other useful features...
+That's it -- All you need to write and run tests! BUT SJTest has plenty of other useful features...
 
 See the [Project page](http://winterstein.github.io/SJTest/), or the code, for more details.
 

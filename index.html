@@ -8,6 +8,9 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    
+    <link rel="stylesheet" type="text/css" href="lib/prettify/prettify.css" />
+    <script src="lib/prettify/prettify.js" />
 
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -39,7 +42,7 @@
           <h3>Get Started: Hello World</h3>
 
 		<p>Tests are defined and run within a normal html page, just like any other javascript. Here is a simple example:</p>
-<pre><code>
+<pre><code class='prettify'>
 &lt;html>
 	&lt;head>
 		&lt;!-- You don't need jQuery or Bootstrap, but if they're present, we use them for nicer output. -->
@@ -72,9 +75,9 @@
 			
 			<p></p>Try it now: <a href='HelloWorld.html?SJTest=on'>HelloWorld.html?SJTest=on</a></p>
 
-		  <h3>Documentation: Running Tests</h3>
+		 <h3>Documentation: Running SJTest</h3>
 
-			<h4>In a browser</h4>		
+			<h4>In a browser: view with SJTest=on</h4>		
 			IMPORTANT: by default, SJTest <i>does nothing</i> in the browser. You must switch it on, 
 			either by adding SJTest=on to the url, or in the page with <pre><code>&lt;script&gt;SJTest.on = true;&lt;/script&gt;</code></pre><br>
 			This is so that SJTest can be deployed as part of production code.
@@ -82,50 +85,48 @@
 			<p>Then just view your html page in any modern browser</p>
 
 			<h4>From the command line with PhantomJS</h4>		
-			First install phantomjs.
+			First install phantomjs.<br>
+			Then call <pre>phantomjs SJTest.js MyTestFile.html</pre>.
 
-			<h4>Run a set of tests	<code>SJTest.run()</code></h4>
+	<h3>Writing Tests</h3>
+		<h4>Run a set of tests	<code>SJTest.run()</code></h4>
+			Example
+				
+			A test is just a function. If it returns without error, the test passes. If it throws an error, the test fails.
+			
+		<h4>Run a set of tests from a separate script file	<code>SJTest.runScript()</code></h4>
+			
+		<h4>Run an injected test script (this is super-handy for debugging in real-world contexts)
+			<code>SJTest.runScriptFromUrl()</code></h4>
 
-			<h4>Run a set of tests from a separate script file	<code>SJTest.runScript()</code></h4>
+		<h4>Run a single test	<code>SJTest.runTest()</code></h4>
 
-			<h4>Run a single test	<code>SJTest.runTest()</code></h4>
+		<h4>Run an async test	<code>SJTest.runTest()</code> using <code>waitFor</code></h4>
 
-			<h4>Run an async test	<code>SJTest.runTest()</code> using <code>waitFor</code></h4>
 
-		  <h3>Documentation: Useful Functions</h3>
-			<h4>Check something	<code>assert()</code></h4>
+	<h3>Documentation: Useful Functions</h3>
+		  
+	  	<p>These handy functions are both in the SJTest namespace, and exported to global (unless you set <code>SJTest.expose=false</code>code>).		  	
+	  	</p>
+	  
+		<h4>Check something	<code>assert()</code></h4>
 
-			<h4>Flexible matching	<code>match()</code> and <code>assertMatch()</code></h4>
+		<h4>Flexible matching	<code>match()</code> and <code>assertMatch()</code></h4>
+		
+		<h4>Class matching	<code>isa()</code></h4>
+		
+		<h4>Waiting on async behaviour	<code>waitFor()</code></h4>
 
-		  <h3>Documentation: SJTest settings</h3>
+		<h4>Flexible toString	<code>str()</code></h4>
 
-			SJTest.on
+	  <h3>Documentation: SJTest settings</h3>
+		
+		SJTest.on
 
-			SJTest.expose
+		SJTest.expose
 
-			SJTest.minTime
-
-			TODO JSDoc
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
-
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
-
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
-        </section>
+		SJTest.minTime
+</section>
 
 
         <aside id="sidebar">
@@ -143,7 +144,7 @@
 
           <p class="repo-owner"><a href="https://github.com/winterstein/SJTest"></a> is maintained by <a href="https://github.com/winterstein">winterstein</a>.</p>
 
-          <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+          <p><small>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</small></p>
         </aside>
 
       </div>
