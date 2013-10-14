@@ -14,8 +14,8 @@
  * Will create if absent:
  * 
  * assert = SJTest.assert
- * assertArgs = SJTest.assertArgs
  * match = SJTest.match
+ * assertMatch = SJTest.assertMatch
  * isa = SJTest.isa
  * 
  * Usage:
@@ -150,14 +150,14 @@
 	SJTest.on = false;
 	
 	/** true by default: Expose SJTest.assert() as a global function
-	 *  -- plus assertArgs(), isa(), waitFor(), match() 
+	 *  -- plus assertMatch(), isa(), waitFor(), match() 
 	 */
 	SJTest.expose = true;
 
 	/**
 	 * {Boolean} If off (the default), then SJTest will do nothing! Which lets you include tests in production code.
 	 * Set by the url parameter SJTest=1, or it can be explicitly set in javascript.
-	 * NB: Even when off, SJTest will still define some functions, e.g. assertArgs() & isa().
+	 * NB: Even when off, SJTest will still define some functions, e.g. assertMatch() & isa().
 	 */
 	{
 		console.log("location", ""+window.location+" on? "+SJTest.on);
@@ -415,24 +415,6 @@
 		throw new Error(smsg);
 	};
 
-	/**
-	 * @deprecated Use SJTest.assertMatch() instead
-	 * Call with alternating parameter, pattern pairs.
-	 * E.g. assertArgs(myNumericParam, Number)
-	 * @throws Error if an argument does not match
-	 */
-	SJTest.assertArgs = function() {
-		assert(arguments.length % 2 == 0, arguments);
-		for(var i=0; i<arguments.length; i+=2) {
-			var v = arguments[i];
-			var m = arguments[i+1];
-			if ( ! SJTest.match(v, m)) {
-				SJTest.match(v, m); // repeat for breakpoint based debugging
-				console.error("Bad arguments", arguments);
-				throw new Error("argument "+((i/2)+1)+") "+v+" != "+m);
-			}
-		}
-	};
 	
 	/**
 	 * Convenience for assert(match(value, matcher), value+" !~ "+matcher);
@@ -632,7 +614,7 @@
 	 * 
 	 */
 	SJTest.waitFor = function(condition, callback, timeout, onTimeout) {
-		SJTest.assertArgs(condition, Function, callback, Function); //, timeout, "?Number", onTimeout, "?Function");
+		SJTest.assertMatch(condition, Function, callback, Function, timeout, "?Number", onTimeout, "?Function");
 		SJTest.waitFor.waitingFor.push([condition, callback, timeout? new Date().getTime()+timeout : false, onTimeout]);
 		SJTest.waitFor.check();
 	};
@@ -852,14 +834,7 @@
 			}
 			if ( ! window.waitFor) {
 				window.waitFor = SJTest.waitFor;
-			}	
-			// attest = assert (useful if assert is already occupied) HM Bit confusing though to have 2 equiv functions
-			//if ( ! window.attest) {
-			//	window.attest = SJTest.assert;
-			//}
-			if ( ! window.assertArgs) {
-				window.assertArgs = SJTest.assertArgs;
-			}
+			}				
 			if ( ! window.assertMatch) {
 				window.assertMatch = SJTest.assertMatch;
 			}
