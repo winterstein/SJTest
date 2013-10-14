@@ -1,28 +1,32 @@
 /**
- * SJTest
+ * SJTest version 0.1
  * @author Daniel Winterstein (http://winterstein.me.uk)
  * 
  * Requires: nothing!
  * 
  * Will use if present:
  * 
- * jQuery (or zepto)
- * Bootstrap 
- * Winterwell's assert.js
- * 
+ *  - jQuery (or zepto)
+ *  - Bootstrap 
+ *  - Winterwell's assert.js
  * 
  * Will create if absent:
  * 
- * assert = SJTest.assert
- * match = SJTest.match
- * assertMatch = SJTest.assertMatch
- * isa = SJTest.isa
+ *  - assert() = SJTest.assert
+ *  - match() = SJTest.match (a flexible matcher for easier testing)
+ *  - assertMatch() = SJTest.assertMatch
+ *  - isa() = SJTest.isa (like instanceof, but more robust)
+ *  - waitFor() = SJTest.waitFor (handy for async tests, and elsewhere)
  * 
  * Usage:
  *  
  *  - In the browser, must be switched on with SJTest.on = true; Or by adding SJTest=on to the url.
  *  - In PhantomJS: Run phantomjs SJTest.js MyTest1.html MyTest2.html
+ * 
+ * Documentation: http://winterstein.github.io/SJTest/ 
+ * Or see the code... 
  */
+
 //(function(){
 //	if (window.SJTest) return;	
 
@@ -432,18 +436,19 @@
 	};
 	
 	/**
-	 * Like instanceof, but more reliable.
+	 * Like instanceof, but more robust.
 	 * 
 	 * @param obj
 	 *            Can be null/undefined (returns false)
 	 * @param klass
 	 *            e.g. Number
+	 * @returns {Boolean} true if obj is an example of klass. 
 	 */
 	SJTest.isa = function(obj, klass) {
-		if (obj == klass) return true;
+		if (obj === klass) return true; // This can be too lenient, e.g. Number is not a Number. But it's generally correct for a prototype language.
 		if (obj instanceof klass) return true;
-		assert(klass.constructor);		
-		for(var i=0; i<10; i++) { // limit the recursion for safety
+		//assert(klass.constructor);		
+		for(var i=0; i<10; i++) { // limit the recursion 10-deep for safety
 			if (obj === null || obj === undefined) return false;
 			if ( ! obj.constructor) return false;
 			if (obj.constructor == klass) return true;
@@ -549,8 +554,6 @@
 		
 		return false;
 	};
-	
-	if ( ! window.match) window.match = SJTest.match;
 	
 	SJTest._scriptsInProcessing = [];
 	
