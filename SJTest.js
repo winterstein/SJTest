@@ -160,7 +160,6 @@
 	 * NB: Even when off, SJTest will still define some functions, e.g. assertMatch() & isa().
 	 */
 	{
-		console.log("location", ""+window.location+" on? "+SJTest.on);
 		var sjon = (""+window.location).match(/SJTest=([^&]+)/);
 		if ( ! sjon || sjon[1].match(/off/)) {
 			SJTest.on = false;			
@@ -171,6 +170,7 @@
 				SJTest._scriptFromUrl = sjon[1]; 
 			}
 		}
+		console.log("location", ""+window.location+" on? "+SJTest.on);
 	}	
 	
 		// Focus on certain tests?
@@ -908,7 +908,9 @@
 		};
 	
 		 // Switch SJTest on!
-		if (url.indexOf('?')!=-1) url += "&SJTest=1"; else url += "?SJTest=1";
+		if (url.indexOf('SJTest=')==-1) {
+			if (url.indexOf('?')!=-1) url += "&SJTest=on"; else url += "?SJTest=on";
+		}
 		page.open(url, cback);
 		SJTest4Phantom._pagesInProcessing.push(page);
 		console.log("PhantomJS opened: "+url+"...");			
