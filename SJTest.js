@@ -991,7 +991,14 @@
 		// Are the pages done?
 		for(var i=0; i<SJTest4Phantom._pagesInProcessing.length; i++) {
 			var page = SJTest4Phantom._pagesInProcessing[i];
-			var done = page.evaluate(function() {return SJTest.isDone();});
+			var done = page.evaluate(function() {
+				try {
+					return SJTest.isDone();
+				} catch(err) {
+					console.log("SJTest:fail	"+window.location+"	"+err);
+					return true;
+				}
+			});
 			//console.log(SJTest.phantomjsTopLevel+" "+page.url+" done "+done);
 			if (done) {
 				//console.log("Remove page!",page);
