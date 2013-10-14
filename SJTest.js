@@ -995,6 +995,10 @@
 				try {
 					return SJTest.isDone();
 				} catch(err) {
+					if ( ! window._SJTestStart) window._SJTestStart = new Date().getTime();
+					if (new Date().getTime() - window._SJTestStart < 10000) { // upto 10 seconds to handle setup messiness
+						return false;
+					}
 					console.log("SJTest:fail	"+window.location+"	"+err);
 					return true;
 				}
