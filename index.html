@@ -96,6 +96,7 @@
 			<code>SJTest.runScriptFromUrl()</code></h4>
 
 		<h4>Run a single test	<code>SJTest.runTest()</code></h4>
+	
 
 		<h4>Run an async test	<code>SJTest.runTest()</code> using <code>waitFor</code></h4>
 
@@ -122,6 +123,14 @@
 		SJTest.expose
 
 		SJTest.minTime
+
+		SJTest.wait {Boolean}
+
+		If true, isDone() will return false.
+		Use-case: To avoid PhantomJS stopping early before after-page-load tests are setup, 	
+		set true while loading & setting up tests, then you must set to false.
+		@see SJTest.minTime
+
 </section>
 
 
