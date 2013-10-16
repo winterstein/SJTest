@@ -36,7 +36,7 @@
 	//	*********************
 	
 	/**
-	 * 
+	 * @class ATest
 	 * @param testName
 	 * @param testFn
 	 *            This should throw something to fail. Or you can use assert();
@@ -129,9 +129,10 @@
 	//	**********************
 	
 	/**
-	 * @class SJTest: Short for (So)DashTest? DanTest? Detest?
-	 */
-	
+	 * Simple Javascript Testing (for browser-based code)
+	 * @class SJTest
+	 * @static
+	 */	
 	var SJTest = {};
 
 	/**
@@ -326,7 +327,7 @@
 	
 		
 	/**
-	 * 
+	 * Called automatically. Adds a table of test results to the page. The table floats above the normal page, and can be closed.
 	 */
 	SJTest.display = function() {
 		if ( ! SJTest.on) {

@@ -1,0 +1,33 @@
+{
+  "name": "sjtest",
+  "preferGlobal": true,
+  "version": "0.1",
+  "author": "winterstein <daniel@sodash.com>",
+  "description": "Simple Javascript Testing (for browser-based code)",
+  "contributors": [],
+  "bin": {
+    "SJTest": "./bin/SJTest"
+  },
+  "scripts": {
+  },
+  "main": "./lib/SJTest",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/winterstein/SJTest.git"
+  },
+  "keywords": [
+    "test", "testing", "unit"
+  ],
+  "dependencies" : {
+  	"phantomjs": "*"
+  },
+  "analyze": false,
+  "devDependencies": {
+  },
+  "bundledDependencies": [
+  ],  
+  "license": "LGPL",
+  "engines": {
+    "node": ">=0.6"
+  }
+}
