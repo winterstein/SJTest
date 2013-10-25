@@ -152,7 +152,11 @@ SJTest.wait = false;
 SJTest.styling = true;
 SJTest.LOGTAG = 'SJTest';
 
-	/** Is testing on? Set to true/false to activate/deactivate SJTest */
+/**
+ * {Boolean} If off (the default), then SJTest will do nothing! Which lets you include tests in production code.
+ * Set by the url parameter SJTest=1, or it can be explicitly set in javascript.
+ * NB: Even when off, SJTest will still define some functions, e.g. assertMatch() & isa().
+ */
 SJTest.on = false;
 
 /** true by default: Expose SJTest.assert() as a global function
@@ -160,12 +164,8 @@ SJTest.on = false;
  */
 SJTest.expose = true;
 
-/**
- * {Boolean} If off (the default), then SJTest will do nothing! Which lets you include tests in production code.
- * Set by the url parameter SJTest=1, or it can be explicitly set in javascript.
- * NB: Even when off, SJTest will still define some functions, e.g. assertMatch() & isa().
- */
 {
+	/** @ignore */
 	var sjon = (""+window.location).match(/SJTest=([^&]+)/);
 	if ( ! sjon || sjon[1].match(/off/)) {
 		SJTest.on = false;			
@@ -177,23 +177,13 @@ SJTest.expose = true;
 		}
 	}
 	console.log("location", ""+window.location+" on? "+SJTest.on);
-}	
+}
 
 	// Focus on certain tests?
 SJTest.skip = [];
 SJTest.only = [];
 
 SJTest.tests = [];
-
-/**
- * {Array<(ATest|String)>} ATest in live usage. Strings (via console) in
- * PhantomJS runner
- */
-//SJTest.passed = [];
-/** {Array<(ATest|String)>} */
-//SJTest.failed = [];
-/** {Array<(ATest|String)>} */
-//SJTest.skipped = [];
 
 /**
  * @param testSet
@@ -224,6 +214,8 @@ SJTest.run = function(testSet) {
  * @see SJTest.wait
  */
 SJTest.minTime = 100;
+/** @ignore */ 
+/* When did SJTest start? Used to determine minTime timeout. */
 SJTest._started = new Date().getTime();
 
 /**
@@ -310,19 +302,11 @@ SJTest.runTest = function(testName, testFn, waitForThis, timeout) {
 	SJTest.tests.push(dtest);
 	// run!
 	if (!skip) {
-		// TODO show running... if (SJTest._displayTable)
-		// SJTest._displayTest(dtest);
 		dtest.run(waitForThis, timeout);
 	} else {
 		dtest.status = 'skip';
 	}
-	// Result
-	if (dtest.status=='pass') {
-//		SJTest.passed.push(dtest);
-	} else {
-//		SJTest.failed.push(dtest);
-	}
-	// display now?
+	// Result! display now?
 	if (SJTest._displayTable) SJTest._displayTest(dtest);
 }; // runTestASync()
 
@@ -341,6 +325,8 @@ SJTest.display = function() {
 		var test = SJTest.tests[i];
 		if (test.status==='pass') good++;
 	}		
+	/** @ignore */ 
+	/* The display DOM element */
 	SJTest._displayPanel = SJTestUtils.$getById("SJTestDisplay");
 	if ( ! SJTest._displayPanel || ! SJTest._displayPanel.length) {
 		//console.log(SJTest.LOGTAG, "Display Make it!");
@@ -359,6 +345,8 @@ SJTest.display = function() {
 			+"<button title='Close Tests' type='button' "+(SJTest.styling? "style='float:right;'":'')+" class='close' aria-hidden='true' onclick=\"$('#SJTestDisplay').remove();\">&times;</button>"
 			+"</h2></div>");
 	
+	/** @ignore */
+	/* DOM table fo results */
 	SJTest._displayTable = SJTestUtils.$create("<table class='table table-bordered'></table>");
 	SJTest._displayTable.append("<tr><th></th><th>Name</th><th>Result</th><th>Details / Stack</th></tr>");
 	SJTest._displayPanel.append(SJTest._displayTable);
@@ -368,8 +356,8 @@ SJTest.display = function() {
 	}		
 }; // display()
 	
-/**
- * Add a row to the display table
+/** @ignore */ 
+/* Add a row to the display table
  * 
  * @param test {ATest}
  */
@@ -474,7 +462,7 @@ SJTest.match = function(value, matcher) {
 	if (value == matcher) return true;
 	var sValue = ""+value;
 	if (typeof matcher==='string') {
-		// JSDoc type? e.g. ?Number or TODO String|Number
+		// JSDoc optional type? e.g. ?Number
 		if (matcher[0] === '?' && (value===null || value===undefined)) {
 			return true;
 		}
@@ -557,6 +545,8 @@ SJTest.match = function(value, matcher) {
 	return false;
 };
 
+/** @ignore */ 
+/* Queue  */
 SJTest._scriptsInProcessing = [];
 
 /**
@@ -675,6 +665,8 @@ SJTest.expectTests = function(n, timeout) {
 	if ( ! SJTest.on) return;
 	assert( ! SJTest._expectTests, "Already expecting "+SJTest._expectTests+" "+n);
 	// Store n for possible reflection
+	/** @ignore */ 
+	/* How many tests do we expect? */
 	SJTest._expectTests = n;
 	if ( ! timeout) timeout = 10000;
 	SJTest.runTest("expectTests_"+n, 
@@ -961,9 +953,13 @@ SJTest4Phantom.goPhantom = function() {
 	    	console.log(SJTest.LOGTAG, "Failed: "+SJTest4Phantom.failed);
 	    	console.log("");
 	    	console.log(SJTest.LOGTAG, "Tests: "+(p+s+f)+"\tPassed: "+p+"\tSkipped: "+s+"\tFailed: "+f);
-	    	if (f==0) console.log(SJTest.LOGTAG, ":)");
-	    	else console.log(SJTest.LOGTAG, ":(");
-	    	phantom.exit();
+	    	if (f==0) {
+	    		console.log(SJTest.LOGTAG, ":)");
+	    		phantom.exit();
+	    	} else {
+	    		console.log(SJTest.LOGTAG, ":(");
+	    		phantom.exit(1);
+	    	}	    	
     	});	
 };
 
