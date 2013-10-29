@@ -35,13 +35,12 @@
 	// 	****    ATest    ****
 	//	*********************
 	
-	/**
-	 * @class ATest
-	 * @param testName
-	 * @param testFn
-	 *            This should throw something to fail. Or you can use assert();
-	 */
-	
+/**
+ * @class ATest
+ * @param testName
+ * @param testFn
+ *            This should throw something to fail. Or you can use assert();
+ */	
 function ATest(testName, testFn) {
 	this.name = testName;
 	this.fn = testFn;
