@@ -38,7 +38,7 @@
 Load this page in a browser -- adding `SJTest=on` to the url -- and you'll see this:
 
 
-[Try it now](http://winterstein.github.io/SJTest/HelloWorld.html?SJTest=on)
+[Try it now](http://www.winterwell.com/software/sjtest/HelloWorld.html?SJTest=on)
 
 Or from the command line, use PhantomJS to automate your testing:
 
@@ -46,5 +46,5 @@ Or from the command line, use PhantomJS to automate your testing:
 
 That's it -- All you need to write and run tests! BUT SJTest has plenty of other useful features...
 
-See the [Project page](http://winterstein.github.io/SJTest/), or the code, for more details.
+See the [Project page](http://www.winterwell.com/software/sjtest/), or the code, for more details.
 
