@@ -1,6 +1,6 @@
 # SJTest: Simple Javascript Testing
 
-[SJTest](http://winterstein.github.io/SJTest/) provides easy-to-use unit & behaviour test tools for browser-based javascript.
+[SJTest](http://www.winterwell.com/software/sjtest/) provides easy-to-use unit & behaviour test tools for browser-based javascript.
 
 > If you write web-pages with javascript, then SJTest can help you to develop & maintain them.
 
