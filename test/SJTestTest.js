@@ -61,7 +61,15 @@ var SJTestTest = {
 	},
 	
 	"match-num-string": function() {
-		SJTest.assert(SJTest.match("0", Number), "0");
+		SJTest.assertMatch("0", Number);
+		SJTest.assertMatch("123", Number);
+		SJTest.assert( ! SJTest.match("foo", Number));
+		SJTest.assert( ! SJTest.match("", Number));
+		
+		SJTest.assertMatch("0", 'Number');
+		SJTest.assertMatch("123", 'Number');
+		SJTest.assert( ! SJTest.match("foo", 'Number'));
+		SJTest.assert( ! SJTest.match("", 'Number'));
 	}
 
 };

@@ -474,7 +474,9 @@ SJTest.match = function(value, matcher) {
 			var m = mArr[1];
 			if (sValue===m) return true;
 			if (m==='Number'||m==='number') { // allow string to number conversion
-				if (typeof value === 'number' || parseFloat(value)) return true;
+				if (typeof value === 'number' && ! isNaN(value)) return true;
+				var nv = parseFloat(value);
+				if (nv || nv===0) return true;
 				continue;
 			}
 			try {
@@ -503,7 +505,9 @@ SJTest.match = function(value, matcher) {
 
 	var lazyMatcher = null;
 	if (matcher===Number) { // allow string to number conversion
-		return typeof value === 'number' || parseFloat(value);  
+		if (typeof value === 'number' && ! isNaN(value)) return true;
+		var nv = parseFloat(value);
+		return (nv || nv===0);
 	}
 	if (typeof matcher==='function') {
 		// Class instanceof test
