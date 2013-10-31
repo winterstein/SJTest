@@ -457,6 +457,7 @@ SJTest.isa = function(obj, klass) {
 	Or an object (which does partial matching, allowing value to have extra properties).
 */
 SJTest.match = function(value, matcher) {
+	// TODO refactor to be cleaner & recursive
 	// simple
 	if (value == matcher) return true;
 	var sValue = ""+value;
@@ -472,6 +473,10 @@ SJTest.match = function(value, matcher) {
 			if ( ! mArr) break;
 			var m = mArr[1];
 			if (sValue===m) return true;
+			if (m==='Number'||m==='number') { // allow string to number conversion
+				if (typeof value === 'number' || parseFloat(value)) return true;
+				continue;
+			}
 			try {
 				var fn = new Function("return "+m);
 				var klass = fn();
@@ -485,7 +490,7 @@ SJTest.match = function(value, matcher) {
 		return false;
 	}
 	// lenient true/false
-	if( ! matcher && ! value) return true;
+	if(matcher===false && ! value) return true;
 	if (matcher===true && value) return true;
 	// RegExp?
 	if (matcher instanceof RegExp) {
@@ -497,8 +502,8 @@ SJTest.match = function(value, matcher) {
 	}
 
 	var lazyMatcher = null;
-	if (matcher===Number) {
-		if ( ! value && value !== 0) return false;
+	if (matcher===Number) { // allow string to number conversion
+		return typeof value === 'number' || parseFloat(value);  
 	}
 	if (typeof matcher==='function') {
 		// Class instanceof test
