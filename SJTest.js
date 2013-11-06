@@ -1,5 +1,5 @@
 /**
- * SJTest version 0.1
+ * SJTest version 0.2
  * @author Daniel Winterstein (http://winterstein.me.uk)
  * 
  * Requires: nothing!
@@ -64,7 +64,7 @@ Object.defineProperty(ATest.prototype, "status", {
 	}
 });
 /**
- * @param waitFor
+ * @param waitForThis
  *            {?function} see SJTest.runTest()
  * @param timeout
  *            {?number} milliseonds Defaults to 5,000
@@ -129,11 +129,15 @@ ATest.prototype.toString = function() {
 //	**********************
 
 /**
- * Simple Javascript Testing (for browser-based code)
+ * Simple Javascript Testing (for browser-based code).
+ * 
+ * Extend an existing object if present, to allow the user to put in settings.
+ * The default values below use ||s to let any user settings take precedence.
+ * 
  * @class SJTest
  * @static
  */	
-var SJTest = {};
+var SJTest = SJTest || {};
 
 /**
  * If true, isDone() will return false.
@@ -141,14 +145,17 @@ var SJTest = {};
  * set true while loading & setting up tests, then you must set to false.
  * @see SJTest.minTime
  */
-SJTest.wait = false;
+SJTest.wait = SJTest.wait || false;
 
 
 	/**
 	 * If true (the default), use inline styles to improve the standard
 	 * display. Set to false if you want to take charge of styling yourself.
 	 */
-SJTest.styling = true;
+if (SJTest.styling===undefined) SJTest.styling = true;
+/**
+ * Used with all console.log output, for easy filtering.
+ */
 SJTest.LOGTAG = 'SJTest';
 
 /**
@@ -156,31 +163,23 @@ SJTest.LOGTAG = 'SJTest';
  * Set by the url parameter SJTest=1, or it can be explicitly set in javascript.
  * NB: Even when off, SJTest will still define some functions, e.g. assertMatch() & isa().
  */
-SJTest.on = false;
+if (SJTest.on===undefined) SJTest.on = false;
 
 /** true by default: Expose SJTest.assert() as a global function
  *  -- plus assertMatch(), isa(), waitFor(), match() 
  */
-SJTest.expose = true;
+if (SJTest.expose===undefined) SJTest.expose = true;
 
-{
-	/** @ignore */
-	var sjon = (""+window.location).match(/SJTest=([^&]+)/);
-	if ( ! sjon || sjon[1].match(/off/)) {
-		SJTest.on = false;			
-	} else {
-		SJTest.on = true;
-		// A script url? See SJTest.runScriptFromUrl()
-		if ( ! sjon[1].match(/on/)) {
-			SJTest._scriptFromUrl = sjon[1]; 
-		}
-	}
-	console.log("location", ""+window.location+" on? "+SJTest.on);
-}
+/**
+ * {Number} milliseconds (default: 100). isDone() will return false for at least this long.
+ * Use-case: To avoid PhantomJS stopping early before after-page-load tests are setup.
+ * @see SJTest.wait
+ */
+if (SJTest.minTime===undefined) SJTest.minTime = 100;
 
-	// Focus on certain tests?
-SJTest.skip = [];
-SJTest.only = [];
+// Focus on certain tests?
+if (SJTest.skip===undefined) SJTest.skip = [];
+if (SJTest.only===undefined) SJTest.only = [];
 
 SJTest.tests = [];
 
@@ -207,12 +206,6 @@ SJTest.run = function(testSet) {
 	}
 }; // run
 
-/**
- * {Number} milliseconds (default: 100). isDone() will return false for at least this long.
- * Use-case: To avoid PhantomJS stopping early before after-page-load tests are setup.
- * @see SJTest.wait
- */
-SJTest.minTime = 100;
 /** @ignore */ 
 /* When did SJTest start? Used to determine minTime timeout. */
 SJTest._started = new Date().getTime();
