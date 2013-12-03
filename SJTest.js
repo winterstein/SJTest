@@ -55,14 +55,14 @@ function ATest(testName, testFn) {
 	this._id = ++ATest._idCnt;
 }
 ATest._idCnt = 0;
-	
-Object.defineProperty(ATest.prototype, "status", {
-	get: function() {return this._status;},
-	set: function(s) {
+
+// NB: Object.defineProperty doesn't work on IE7
+ATest.prototype.getStatus = function() {return this._status;};
+ATest.prototype.setStatus	= function(s) {
 		this._status = s;
-		console.log(SJTest.LOGTAG+':'+this.status, this.name, this.details || this.stack || '');
-	}
-});
+		// Logging status provides a hook for the PhantomJS runner to watch
+		console.log(SJTest.LOGTAG+':'+this._status, this.name, this.details || this.stack || '');
+	};
 /**
  * @param waitForThis
  *            {?function} see SJTest.runTest()
@@ -75,8 +75,8 @@ ATest.prototype.run = function(waitForThis, timeout) {
 		// Winterwell's assert() will normally swallow errors (outputting to
 		// log) -- But we want them thrown
 		window.reportError = function(err){throw err;};			
-		this.status = 'running...';
-		console.log(SJTest.LOGTAG, this.name, this.status);
+		this.setStatus('running...');
+		console.log(SJTest.LOGTAG, this.name, this.getStatus());
 		
 		// Run test!
 		// NB: Pass in the ATest for reflection, though almost all tests will ignore it.
@@ -84,14 +84,14 @@ ATest.prototype.run = function(waitForThis, timeout) {
 		
 		// wait for async test?
 		if ( ! waitForThis) {
-			this.status = 'pass';
+			this.setStatus('pass');
 			return;
 		}
 		
 		// waitFor?			
 		var atest = this;
 		var testDoneFn = function(yes) {				
-			atest.status = 'pass';
+			atest.setStatus('pass');
 //			SJTest.passed.push(atest);
 			if (yes !== true) atest.details = yes;
 			assert(match(SJTest._displayTest, Function));
@@ -101,7 +101,7 @@ ATest.prototype.run = function(waitForThis, timeout) {
 		var timeoutFn = function() {
 			//console.log("TIMEOUT ATest.this", atest);				
 			atest.error = new Error("Timeout");
-			atest.status = 'fail';
+			atest.setStatus('fail');
 			//SJTest.failed.push(atest);
 			assert(match(SJTest._displayTest, Function));
 			if (SJTest._displayTable) SJTest._displayTest(atest);
@@ -112,14 +112,14 @@ ATest.prototype.run = function(waitForThis, timeout) {
 	} catch(error) {
 		this.error = error;
 		if (error && error.stack) this.stack = error.stack;
-		this.status = 'fail';			
+		this.setStatus('fail');			
 	} finally {
 		window.reportError = old_re;
 	}
 };
 
 ATest.prototype.toString = function() {
-	return "ATest["+this.name+" "+this.status+"]";
+	return "ATest["+this.name+" "+this.getStatus()+"]";
 };
 	
 
@@ -224,7 +224,7 @@ SJTest.isDone = function() {
 	// Any running tests?
 	for(var i=0; i<SJTest.tests.length; i++) {
 		var test = SJTest.tests[i];
-		if (test.status==='running...') return false;
+		if (test.getStatus()==='running...') return false;
 	}
 	//console.log("isDone! ", SJTest.tests.length);
 	return true;
@@ -296,7 +296,7 @@ SJTest.runTest = function(testName, testFn, waitForThis, timeout) {
 	if (!skip) {
 		dtest.run(waitForThis, timeout);
 	} else {
-		dtest.status = 'skip';
+		dtest.setStatus('skip');
 	}
 	// Result! display now?
 	if (SJTest._displayTable) SJTest._displayTest(dtest);
@@ -315,7 +315,7 @@ SJTest.display = function() {
 	var good=0,total=SJTest.tests.length;
 	for(var i=0; i<SJTest.tests.length; i++) {
 		var test = SJTest.tests[i];
-		if (test.status==='pass') good++;
+		if (test.getStatus()==='pass') good++;
 	}		
 	/** @ignore */ 
 	/* The display DOM element */
@@ -365,20 +365,20 @@ SJTest._displayTest = function(test) {
 		//console.log('make it', trid);
 	} //else console.log('got it',trid);
 	if (SJTest.styling) {
-		var col = test.status=='pass'? '#9f9' : test.status=='skip'? '#ccf' : test.status=='running...'? '#fff' : '#f99';			
+		var col = test.getStatus()==='pass'? '#9f9' : test.getStatus()==='skip'? '#ccf' : test.getStatus()==='running...'? '#fff' : '#f99';			
 		tr.css({border:'1px solid #333', 'background-color':col});
 	}
 			
 	tr.html("<td><a href='#' title='Re-run this test' onclick='SJTest.runTest(\""+test.name+"\"); return false;'>&#8635;</a></td><td>"
 			+test.name
-			+"</td><td>"+test.status+"</td><td>"+(test.error || SJTestUtils.str(test.details) || '-')
+			+"</td><td>"+test.getStatus()+"</td><td>"+(test.error || SJTestUtils.str(test.details) || '-')
 			+" "+(test.stack || '')+"</td>");
 			
 	// update scores
 	var good=0,total=SJTest.tests.length;
 	for(var i=0; i<SJTest.tests.length; i++) {
 		var test = SJTest.tests[i];
-		if (test.status==='pass') good++;
+		if (test.getStatus()==='pass') good++;
 	}
 	
 	SJTestUtils.$getById('_SJTestGood').html(''+good);
