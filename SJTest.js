@@ -163,7 +163,10 @@ SJTest.LOGTAG = 'SJTest';
  * Set by the url parameter SJTest=1, or it can be explicitly set in javascript.
  * NB: Even when off, SJTest will still define some functions, e.g. assertMatch() & isa().
  */
-if (SJTest.on===undefined) SJTest.on = false;
+if (SJTest.on===undefined) {
+	var locn = ""+window.location;
+	SJTest.on = locn.indexOf("SJTest=1")!=-1 || locn.indexOf("SJTest=true")!=-1 || locn.indexOf("SJTest=on")!=-1;
+}
 
 /** true by default: Expose SJTest.assert() as a global function
  *  -- plus assertMatch(), isa(), waitFor(), match() 
@@ -387,18 +390,26 @@ SJTest._displayTest = function(test) {
 	
 /**
  * An assert function.
- * 
+ * Error handling can be overridden by replacing SJTest.assertFailed()
  * @param betrue
- *            If true, do nothing. If false, throw an Error
+ *            If true, do nothing. If false, console.error and throw an Error.
+ *            For testing jQuery selections: Use e.g. $('#foo').length
  * @param msg
- *            Message on error.
+ *            Message on error. This can be an object (which will be logged to console as-is, 
+ *            and converted to a string for the error).
  */
 SJTest.assert = function(betrue, msg) {
 	if (betrue) return;
+	SJTest.assertFailed(msg);
+};
+/**
+ * Handle assert() failures. Users can replace this with a custom handler.
+ */
+SJTest.assertFailed = function(msg) {
+	if (msg) console.error("assert", msg);
 	// A nice string?
-	console.error("assert", msg || betrue);
 	var smsg = SJTestUtils.str(msg);
-	throw new Error(smsg);
+	throw new Error("assert: "+smsg);
 };
 
 
@@ -712,6 +723,7 @@ SJTestUtils.init = function() {
 		// WTF? IE6? Oh well -- may as well play safe
 		window.console = {};
 		window.console.log = function(){};
+		window.console.error = function(){};
 	}
 	
 			
@@ -745,6 +757,9 @@ SJTestUtils.init = function() {
 		};
 	}
 
+	/**
+	 * str -- Robust stringify. Use Winterwell's printer.str() if available. Else a simple version.
+	 */
 	if (window.printer && printer.str) {
 		SJTestUtils.str = printer.str;
 	} else {
@@ -824,7 +839,7 @@ SJTestUtils.init = function() {
 	
 	// Make SJTest functions global??
 	if (SJTest.expose) {
-		// assert
+		// But don't override anything
 		if ( ! window.assert) {
 			window.assert = SJTest.assert;
 		}
