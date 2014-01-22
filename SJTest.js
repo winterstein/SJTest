@@ -1,5 +1,5 @@
 /**
- * SJTest version 0.2
+ * SJTest
  * @author Daniel Winterstein (http://winterstein.me.uk)
  * 
  * Requires: nothing!
@@ -138,6 +138,9 @@ ATest.prototype.toString = function() {
  * @static
  */	
 var SJTest = SJTest || {};
+
+/** What version of SJTest is this? */
+SJTest.version = '0.3.0';
 
 /**
  * If true, isDone() will return false.
