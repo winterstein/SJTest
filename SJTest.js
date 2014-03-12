@@ -180,12 +180,24 @@ SJTest.LOGTAG = 'SJTest';
 
 /**
  * {Boolean} If off (the default), then SJTest will do nothing! Which lets you include tests in production code.
- * Set by the url parameter SJTest=1, or it can be explicitly set in javascript.
+ * Set by the url parameter SJTest, or it can be explicitly set in javascript (a javascript setting takes precedence over a url parameter).
  * NB: Even when off, SJTest will still define some functions, e.g. assertMatch() & isa().
  */
 if (SJTest.on===undefined) {
 	var locn = ""+window.location;
+	var queryParser = /[?&]SJTest=([^&]+)?/;
+	var m = locn.match(queryParser);
+	if (m && m[1] && m[1]!=='false' && m[1]!=='off') {
+		SJTest.on = true;
+	}
+}
+
+// Iterate over each key-value pair, and add them to the map.
+while ((param = queryParser.exec(query))) {
+	result[decodeURIComponent(param[1])] = decodeURIComponent(param[2]) || '';
+	
 	SJTest.on = locn.indexOf("SJTest=1")!=-1 || locn.indexOf("SJTest=true")!=-1 || locn.indexOf("SJTest=on")!=-1;
+	
 }
 
 /** true by default: Expose SJTest.assert() as a global function
@@ -613,18 +625,23 @@ SJTest.runScript = function(url, after) {
  * use if an attacker could place a script onto the same domain, or abuse
  * one of yours.
  */
-SJTest.runScriptFromUrl = function() {			
-	var script = SJTest._scriptFromUrl;
-	console.log(SJTest.LOGTAG, "runScriptFromUrl: "+script);
+SJTest.runScriptFromUrl = function() {
+	// Is there a script in the url?
+	var locn = ""+window.location;
+	var queryParser = /[?&]SJTest=([^&]+)?/;
+	var m = locn.match(queryParser);
+	if ( ! m) return;	
+	var script = m[1];	
 	if ( ! script) return;
 	if ( ! SJTest.on) {
 		 // Not on!
 		console.log(SJTest.LOGTAG, "NOT on, so not running script "+script);
 		return;
 	}			
+	console.log(SJTest.LOGTAG, "runScriptFromUrl: "+script);
 	// Security check: must be a relative url
 	if (script.indexOf('//') != -1) {
-		console.warn(SJTest.LOGTAG, "For security, you cannot run cross-domain test scripts.");
+		console.warn(SJTest.LOGTAG, "NOT running. For security, you cannot run cross-domain test scripts.");
 		return;
 	}
 	SJTest.runScript(script);
