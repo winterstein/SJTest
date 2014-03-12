@@ -57,12 +57,21 @@ function ATest(testName, testFn) {
 ATest._idCnt = 0;
 
 // NB: Object.defineProperty doesn't work on IE7
+/**
+ * @returns {string} queue|skip|running...|waiting|pass|fail
+ */
 ATest.prototype.getStatus = function() {return this._status;};
+/**
+ * @param s {string} Must be one of: queue|skip|running...|waiting|pass|fail <br>
+ * You can use setStatus('waiting') within a test function to defer pass/fail. <br>
+ * You can then use setStatus('fail') within a test function to explicitly fail the test.
+ */
 ATest.prototype.setStatus	= function(s) {
-		this._status = s;
-		// Logging status provides a hook for the PhantomJS runner to watch
-		console.log(SJTest.LOGTAG+':'+this._status, this.name, this.details || this.stack || '');
-	};
+	assert('|queue|skip|running...|waiting|pass|fail|'.indexOf(s) != -1, s);
+	this._status = s;
+	// Logging status provides a hook for the PhantomJS runner to watch
+	console.log(SJTest.LOGTAG+':'+this._status, this.name, this.details || this.stack || '');
+};
 /**
  * @param waitForThis
  *            {?function} see SJTest.runTest()
@@ -78,21 +87,30 @@ ATest.prototype.run = function(waitForThis, timeout) {
 		this.setStatus('running...');
 		console.log(SJTest.LOGTAG, this.name, this.getStatus());
 		
-		// Run test!
+		// Run the Test!
 		// NB: Pass in the ATest for reflection, though almost all tests will ignore it.
+		// The ATest is one way of doing async tests: E.g.
+		// function MyTest(test) {test.setStatus('waiting');
+		//   $.get('myurl').done(function(){test.setStatus('pass');}); 	
+		// }
 		this.details = this.fn(this);
-		
+				
 		// wait for async test?
+		var atest = this;
 		if ( ! waitForThis) {
-			this.setStatus('pass');
-			return;
+			if (this._status === 'waiting') {
+				waitForThis = function(){return atest._status==='pass' || atest._status==='fail';};
+			} else {
+				// All done -- no need to wait
+				this.setStatus('pass');
+				return;
+			}
 		}
 		
-		// waitFor?			
-		var atest = this;
-		var testDoneFn = function(yes) {				
-			atest.setStatus('pass');
-//			SJTest.passed.push(atest);
+		// waitFor?					
+		var testDoneFn = function(yes) {		
+			// Passed (unless it failed itself)
+			if (atest._status !== 'fail') atest.setStatus('pass');
 			if (yes !== true) atest.details = yes;
 			assert(match(SJTest._displayTest, Function));
 			if (SJTest._displayTable) SJTest._displayTest(atest); 
@@ -102,13 +120,12 @@ ATest.prototype.run = function(waitForThis, timeout) {
 			//console.log("TIMEOUT ATest.this", atest);				
 			atest.error = new Error("Timeout");
 			atest.setStatus('fail');
-			//SJTest.failed.push(atest);
 			assert(match(SJTest._displayTest, Function));
 			if (SJTest._displayTable) SJTest._displayTest(atest);
 		};
 		
 		SJTest.waitFor(waitForThis, testDoneFn, 
-			timeout || 5000, timeoutFn);
+			timeout || 10000, timeoutFn);
 	} catch(error) {
 		this.error = error;
 		if (error && error.stack) this.stack = error.stack;
@@ -247,8 +264,7 @@ SJTest.isDone = function() {
  *            will be reported as the test-details). Throw an error if
  *            the test fails.
  * @param timeout
- *            {?Number} max milliseconds to allow. Default to 5000 (5
- *            seconds)
+ *            {?Number} max milliseconds to allow. Default to 10000 (10 seconds)
  */
 SJTest.runTest = function(testName, testFn, waitForThis, timeout) {
 	if ( ! SJTest.on) {
@@ -371,7 +387,7 @@ SJTest._displayTest = function(test) {
 		//console.log('make it', trid);
 	} //else console.log('got it',trid);
 	if (SJTest.styling) {
-		var col = test.getStatus()==='pass'? '#9f9' : test.getStatus()==='skip'? '#ccf' : test.getStatus()==='running...'? '#fff' : '#f99';			
+		var col = test.getStatus()==='pass'? '#9f9' : test.getStatus()==='skip'? '#ccf' : test.getStatus()==='running...'||test.getStatus()==='waiting'? '#ff9' : '#f99';			
 		tr.css({border:'1px solid #333', 'background-color':col});
 	}
 			
@@ -616,18 +632,26 @@ SJTest.runScriptFromUrl = function() {
 
 /**
  * Waitfor, adapted from http://blog.jeffscudder.com/2012/07/waitfor-javascript.html
-@param condition {function} return true when ready. Errors are ignored.
-@param callback {function} Called once condition is true.
+ * This does *not* block, but calls the callback when ready and any then/done/fail deferred functions.
+ * <p>
+ * Note: Why no blocking? Blocking is problematic given that normal javascript is single-threaded with switching.
+ * Usually you're waiting on an ajax request. Blocking would deny the ajax handler a chance to run. So you would
+ * block forever. 
+ * 
+@param condition {Function} return true when ready. Errors are ignored.
+@param callback {?Function} Called once condition is true.
 @param timeout {?Number} Max time in milliseconds. If unset: wait indefinitely.
-@param onTimeout {?function} Called if timeout occurs.
+@param onTimeout {?Function} Called if timeout occurs.
 
-@returns TODO a promise, so you can do waitFor(X).then(Y)
+@returns A jQuery deferred object (IF jQuery is present), so you can do waitFor(X).then(Y). null if no jQuery.
  * 
  */
-SJTest.waitFor = function(condition, callback, timeout, onTimeout) {
-	SJTest.assertMatch(condition, Function, callback, Function, timeout, "?Number", onTimeout, "?Function");
-	SJTest.waitFor.waitingFor.push([condition, callback, timeout? new Date().getTime()+timeout : false, onTimeout]);
+SJTest.waitFor = function(condition, callback, timeout, onTimeout) {	
+	SJTest.assertMatch(condition, Function, callback, "?Function", timeout, "?Number", onTimeout, "?Function");
+	var deferred = window.jQuery? new jQuery.Deferred() : null;
+	SJTest.waitFor.waitingFor.push([condition, callback, timeout? new Date().getTime()+timeout : false, onTimeout, deferred]);
 	SJTest.waitFor.check();
+	return deferred;
 };
 
 SJTest.waitFor.waitingFor = [];
@@ -636,6 +660,9 @@ SJTest.waitFor.waitingFor = [];
  */
 SJTest.waitFor.period = 50;
 
+/**
+ * Check all the things we're waiting on. Schedule another check a bit later if we're still waiting.
+ */
 SJTest.waitFor.check = function() {
 	var stillWaitingFor = [];
 	for (var i = 0; i < SJTest.waitFor.waitingFor.length; i++) {
@@ -645,13 +672,18 @@ SJTest.waitFor.check = function() {
 			condMet = row[0]();
 		} catch (e) {}
 		if (condMet) {
-			row[1](condMet);
+			// Done! ...Callback
+			if (row[1]) row[1](condMet);
+			// ...Deferred
+			if (row[4]) row[4].resolve();
 			continue;
 		}
 		if (row[2] && new Date().getTime() > row[2]) {
 			// time out!
 			console.log("waitFor timeout "+row[0]);
-			if (row[3]) row[3]();				
+			if (row[3]) row[3]();
+			// deferred fail
+			if (row[4]) row[4].reject();
 			continue;
 		}
 		stillWaitingFor.push(SJTest.waitFor.waitingFor[i]);
