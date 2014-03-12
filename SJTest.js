@@ -157,7 +157,7 @@ ATest.prototype.toString = function() {
 var SJTest = SJTest || {};
 
 /** What version of SJTest is this? */
-SJTest.version = '0.3.0';
+SJTest.version = '0.3.1';
 
 /**
  * If true, isDone() will return false.
@@ -180,7 +180,9 @@ SJTest.LOGTAG = 'SJTest';
 
 /**
  * {Boolean} If off (the default), then SJTest will do nothing! Which lets you include tests in production code.
- * Set by the url parameter SJTest, or it can be explicitly set in javascript (a javascript setting takes precedence over a url parameter).
+ * Set by the url parameter SJTest=(on|a url), or it can be explicitly set in javascript. 
+ * A javascript setting takes precedence over a url parameter.
+ * <p>
  * NB: Even when off, SJTest will still define some functions, e.g. assertMatch() & isa().
  */
 if (SJTest.on===undefined) {
@@ -189,15 +191,9 @@ if (SJTest.on===undefined) {
 	var m = locn.match(queryParser);
 	if (m && m[1] && m[1]!=='false' && m[1]!=='off') {
 		SJTest.on = true;
+	} else {
+		SJTest.on = false;
 	}
-}
-
-// Iterate over each key-value pair, and add them to the map.
-while ((param = queryParser.exec(query))) {
-	result[decodeURIComponent(param[1])] = decodeURIComponent(param[2]) || '';
-	
-	SJTest.on = locn.indexOf("SJTest=1")!=-1 || locn.indexOf("SJTest=true")!=-1 || locn.indexOf("SJTest=on")!=-1;
-	
 }
 
 /** true by default: Expose SJTest.assert() as a global function
@@ -259,7 +255,9 @@ SJTest.isDone = function() {
 	// Any running tests?
 	for(var i=0; i<SJTest.tests.length; i++) {
 		var test = SJTest.tests[i];
-		if (test.getStatus()==='running...') return false;
+		if (test.getStatus()!=='pass' && test.getStatus()!=='fail' && test.getStatus()!=='skip') {
+			return false;
+		}
 	}
 	//console.log("isDone! ", SJTest.tests.length);
 	return true;
@@ -379,7 +377,7 @@ SJTest.display = function() {
 	for(var i=0; i<SJTest.tests.length; i++) {
 		var test = SJTest.tests[i];
 		SJTest._displayTest(test);				
-	}		
+	}	
 }; // display()
 	
 /** @ignore */ 
@@ -960,15 +958,17 @@ SJTest4Phantom._doThemAll = function() {
 	assert(SJTest.phantomjsTopLevel, SJTest);
 	var page = require('webpage').create();
 	// echo console messages
-	page.onConsoleMessage = function(m){
-		console.log(m); // ?? filter by LOGTAG
-		var mcode = m.substr(0, 'SJTest:pass'.length);
-		if (mcode==='SJTest:pass') {
-			SJTest4Phantom.passed.push(m);
-		} else if (mcode==='SJTest:fail') {
-			SJTest4Phantom.failed.push(m);
-		} else if (mcode==='SJTest:skip') {
-			SJTest4Phantom.skipped.push(m);
+	page.onConsoleMessage = function(msg){
+		console.log(msg); // filter by LOGTAG
+		var m = msg.match(/SJTest:(\S+) (.+)/);
+		if ( ! m) return;
+		var mcode=m[1], testName=m[2];
+		if (mcode==='pass') {
+			SJTest4Phantom.passed.push(testName);
+		} else if (mcode==='fail') {
+			SJTest4Phantom.failed.push(testName);
+		} else if (mcode==='skip') {
+			SJTest4Phantom.skipped.push(testName);
 		}
 	};
 
@@ -994,7 +994,7 @@ SJTest4Phantom.goPhantom = function() {
 		console.warn("SJTest OFF: Did not recognise script "+args[0]);		
 	}
 	if (args.length === 1) {
-		console.log('SJTest version 0.1 by Daniel Winterstein');
+		console.log('SJTest version '+SJTest.version+' by Daniel Winterstein');
 	    console.log('Usage: phantomjs SJTest.js MyTestFile1.html MyTestFile2.html ...');
 	    phantom.exit();
 	    return;
