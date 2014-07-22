@@ -16,10 +16,10 @@
 </head>
 <body>
 <script>
-console.log("RANNING?!");
+console.log("RUNNING?!");
 
 // How many tests are on this page?
-SJTest.expectTests(4);
+SJTest.expectTests(5);
 
 $(function() {
 	SJTest.run({name:'WithDelay',
@@ -62,6 +62,12 @@ SJTest.runTest(
 	}, 
 	1000 
 );
+
+
+SJTest.runTest('waitingTest', function(test) {
+			test.setStatus("waiting");
+			setTimeout(function(){test.setStatus("pass");}, 2000);
+		});
 
 console.log("RAN?!");
 
