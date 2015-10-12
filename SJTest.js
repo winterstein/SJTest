@@ -1,5 +1,5 @@
 /**
- * SJTest
+ * SJTest - version 0.3.2
  * @author Daniel Winterstein (http://winterstein.me.uk)
  * 
  * Requires: nothing!
@@ -157,7 +157,7 @@ ATest.prototype.toString = function() {
 var SJTest = SJTest || {};
 
 /** What version of SJTest is this? */
-SJTest.version = '0.3.1';
+SJTest.version = '0.3.2';
 
 /**
  * If true, isDone() will return false.
@@ -426,9 +426,11 @@ SJTest._displayTest = function(test) {
  * @param msg
  *            Message on error. This can be an object (which will be logged to console as-is, 
  *            and converted to a string for the error).
+ * @returns betrue on success. This allows assert() to be used as a transparent wrapper.
+ * E.g. you might write <code>var x = assert(mything.propertyWhichMustExist);</code>           
  */
 SJTest.assert = function(betrue, msg) {
-	if (betrue) return;
+	if (betrue) return betrue;
 	SJTest.assertFailed(msg);
 };
 /**
@@ -437,8 +439,8 @@ SJTest.assert = function(betrue, msg) {
 SJTest.assertFailed = function(msg) {
 	if (msg) console.error("assert", msg);
 	// A nice string?
-	var smsg = SJTestUtils.str(msg);
-	throw new Error("assert: "+smsg);
+	var smsg = SJTestUtils.str(msg || "no info");
+	throw new Error("assert-failed: "+smsg);
 };
 
 

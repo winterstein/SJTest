@@ -1,0 +1,2 @@
+
+0.3.2: assert() returns its input
