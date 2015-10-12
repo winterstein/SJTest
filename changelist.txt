@@ -1,2 +1,2 @@
 
-0.3.2: assert() returns its input
+0.3.2: assert() returns its input, special case for jquery-failed-to-find.

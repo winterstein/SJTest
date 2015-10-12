@@ -421,7 +421,8 @@ SJTest._displayTest = function(test) {
  * An assert function.
  * Error handling can be overridden by replacing SJTest.assertFailed()
  * @param betrue
- *            If true, do nothing. If false, console.error and throw an Error.
+ *            If true (or any truthy value), do nothing. If falsy, console.error and throw an Error.
+ *            HACK: As a special convenience, the empty jQuery result (ie a jquery select which find nothing) is considered to be false! 
  *            For testing jQuery selections: Use e.g. $('#foo').length
  * @param msg
  *            Message on error. This can be an object (which will be logged to console as-is, 
@@ -430,7 +431,14 @@ SJTest._displayTest = function(test) {
  * E.g. you might write <code>var x = assert(mything.propertyWhichMustExist);</code>           
  */
 SJTest.assert = function(betrue, msg) {
-	if (betrue) return betrue;
+	if (betrue) {
+		if (betrue.jquery && betrue.length===0) {
+			// empty jquery selection - treat as false
+			if ( ! msg) msg = "empty jquery selection";
+		} else {
+			return betrue;
+		}
+	}
 	SJTest.assertFailed(msg);
 };
 /**
