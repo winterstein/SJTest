@@ -8,7 +8,6 @@
  * 
  *  - jQuery (or zepto)
  *  - Bootstrap 
- *  - Winterwell's assert.js
  * 
  * Will create if absent:
  * 
@@ -167,11 +166,10 @@ SJTest.version = '0.3.2';
  */
 SJTest.wait = SJTest.wait || false;
 
-
-	/**
-	 * If true (the default), use inline styles to improve the standard
-	 * display. Set to false if you want to take charge of styling yourself.
-	 */
+/**
+ * If true (the default), use inline styles to improve the standard
+ * display. Set to false if you want to take charge of styling yourself.
+ */
 if (SJTest.styling===undefined) SJTest.styling = true;
 /**
  * Used with all console.log output, for easy filtering.
