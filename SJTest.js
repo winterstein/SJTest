@@ -439,15 +439,15 @@ SJTest.assert = function(betrue, msg) {
 		// success
 		return betrue;		
 	}
-	SJTest.assertFailed(msg);
+	SJTest.assertFailed(msg || betrue);
 };
 /**
  * Handle assert() failures. Users can replace this with a custom handler.
  */
 SJTest.assertFailed = function(msg) {
-	console.error("assert", msg || "no info");
+	console.error("assert", msg);
 	// A nice string?
-	var smsg = SJTestUtils.str(msg || "no info");
+	var smsg = SJTestUtils.str(msg);
 	throw new Error("assert-failed: "+smsg);
 };
 
