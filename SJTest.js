@@ -433,9 +433,11 @@ SJTest.assert = function(betrue, msg) {
 		if (betrue.jquery && betrue.length===0) {
 			// empty jquery selection - treat as false
 			if ( ! msg) msg = "empty jquery selection";
-		} else {
-			return betrue;
+			SJTest.assertFailed(msg);
+			return;
 		}
+		// success
+		return betrue;		
 	}
 	SJTest.assertFailed(msg);
 };
@@ -443,7 +445,7 @@ SJTest.assert = function(betrue, msg) {
  * Handle assert() failures. Users can replace this with a custom handler.
  */
 SJTest.assertFailed = function(msg) {
-	if (msg) console.error("assert", msg);
+	console.error("assert", msg || "no info");
 	// A nice string?
 	var smsg = SJTestUtils.str(msg || "no info");
 	throw new Error("assert-failed: "+smsg);
