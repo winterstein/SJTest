@@ -24,6 +24,33 @@ var SJTestTest = {
 		SJTest.assert( ! SJTest.match("a", Number), "- a");
 	},
 
+
+	"match-ES6-class": function() {
+		class Foo {
+
+		}
+		var foo = new Foo();
+		SJTest.assert(SJTest.match(foo, Foo));
+		SJTest.assert(SJTest.match(foo, "Foo"));
+	},
+
+
+	"match-ES6-super-class": function() {
+		class Foo {
+
+		}
+		class Bar extends Foo {
+
+		}
+		var foo = new Foo();
+		var bar = new Bar();
+		SJTest.assert(SJTest.match(foo, Foo));
+		SJTest.assert(SJTest.match(foo, "Foo"));
+		SJTest.assert(SJTest.match(bar, Bar));
+		SJTest.assert(SJTest.match(bar, Foo));
+		SJTest.assert(SJTest.match(bar, "Foo"));
+	},
+
 	"match-classJSDoc?": function() {
 		SJTest.assertMatch(null, "?Number");
 		SJTest.assertMatch(1, "?Number");
