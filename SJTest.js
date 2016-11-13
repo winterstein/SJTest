@@ -1,5 +1,5 @@
 /**
- * SJTest - version 0.3.2
+ * SJTest - version: see SJTest.version property
  * @author Daniel Winterstein (http://winterstein.me.uk)
  *
  * Requires: nothing!
@@ -26,13 +26,12 @@
  * Or see the code...
  */
 
-//(function(){
-//	if (window.SJTest) return;
+// In mocha/node?
+if (typeof window === 'undefined') window = global;
 
-
-	//	*********************
-	// 	****    ATest    ****
-	//	*********************
+//	*********************
+// 	****    ATest    ****
+//	*********************
 
 /**
  * @class ATest
@@ -41,6 +40,7 @@
  *            This should throw something to fail. Or you can use assert();
  */
 function ATest(testName, testFn) {
+	assertMatch(testName, String, testFn, Function);
 	this.name = testName;
 	this.fn = testFn;
 	this._status = 'queue';
@@ -156,7 +156,7 @@ ATest.prototype.toString = function() {
 var SJTest = SJTest || {};
 
 /** What version of SJTest is this? */
-SJTest.version = '0.3.2';
+SJTest.version = '0.3.3';
 
 /**
  * If true, isDone() will return false.
@@ -510,6 +510,7 @@ SJTest.match = function(value, matcher) {
 		if (matcher[0] === '?' && (value===null || value===undefined)) {
 			return true;
 		}
+		if (value===null || value===undefined) return false;
 		// Get the class function(s)
 		var ms = matcher.split("|");
 		for(var mi=0; mi<ms.length; mi++) {
@@ -530,11 +531,20 @@ SJTest.match = function(value, matcher) {
 					return true;
 				}
 			} catch(err) {
-				// oh well??
-			}
-		}
+				// eval(m) failed to find a class
+				// A non-global ES6 class?
+				if (value.constructor) {
+					if (value.constructor.name === m) {
+						return true;
+					}
+					// TODO how can we get to the super-class if there is one?
+					// Note: this is just for the string matcher. If the user put in a proper class object, we're fine.
+				}
+			} // ./try class test
+		} // ./ for matcher-bit
 		return false;
-	}
+	} // string matcher
+
 	// lenient true/false
 	if(matcher===false && ! value) return true;
 	if (matcher===true && value) return true;
@@ -925,7 +935,7 @@ SJTestUtils.init = function() {
 // / END FUNCTIONS *** START SCRIPT ///
 
 // PhantomJS?
-if (navigator && navigator.userAgent
+if (typeof(navigator)!=='undefined' && navigator.userAgent
 		&& navigator.userAgent.toLowerCase().indexOf("phantomjs")!=-1) {
 	// In Phantom -- but top level or inside a page?
 	if ( ! window.location.hostname &&
@@ -1089,4 +1099,10 @@ if ( ! SJTest.phantomjsTopLevel) {
 	SJTest4Phantom.goPhantom();
 }
 
-//}()); // end !SJTest wrapper function
+// EXPORT
+if (typeof(module)!=='undefined') {
+	module.exports = SJTest;
+}
+
+// }(_window, _module));
+// end !SJTest wrapper function

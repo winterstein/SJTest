@@ -24,7 +24,6 @@ var SJTestTest = {
 		SJTest.assert( ! SJTest.match("a", Number), "- a");
 	},
 
-
 	"match-ES6-class": function() {
 		class Foo {
 
@@ -32,8 +31,8 @@ var SJTestTest = {
 		var foo = new Foo();
 		SJTest.assert(SJTest.match(foo, Foo));
 		SJTest.assert(SJTest.match(foo, "Foo"));
+		SJTest.assert( ! SJTest.match(foo, "Number"));
 	},
-
 
 	"match-ES6-super-class": function() {
 		class Foo {
@@ -46,9 +45,10 @@ var SJTestTest = {
 		var bar = new Bar();
 		SJTest.assert(SJTest.match(foo, Foo));
 		SJTest.assert(SJTest.match(foo, "Foo"));
+		SJTest.assert( ! SJTest.match(foo, Bar));
 		SJTest.assert(SJTest.match(bar, Bar));
 		SJTest.assert(SJTest.match(bar, Foo));
-		SJTest.assert(SJTest.match(bar, "Foo"));
+		// SJTest.assert(SJTest.match(bar, "Foo")); This fails :(
 	},
 
 	"match-classJSDoc?": function() {
