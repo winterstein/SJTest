@@ -34,7 +34,7 @@ var SJTestTest = {
 		SJTest.assert( ! SJTest.match(foo, "Number"));
 	},
 
-	"match-ES6-super-class": function() {
+	"match-ES6-super-class-class-matcher": function() {
 		class Foo {
 
 		}
@@ -48,7 +48,20 @@ var SJTestTest = {
 		SJTest.assert( ! SJTest.match(foo, Bar));
 		SJTest.assert(SJTest.match(bar, Bar));
 		SJTest.assert(SJTest.match(bar, Foo));
-		// SJTest.assert(SJTest.match(bar, "Foo")); This fails :(
+	},
+
+	"match-ES6-super-class-string-matcher": function() {
+		class Foo {
+
+		}
+		class Bar extends Foo {
+
+		}
+		var foo = new Foo();
+		var bar = new Bar();
+		SJTest.assert(SJTest.match(bar, "Foo"));
+		SJTest.assert( ! SJTest.match(bar, "Goo"));
+		SJTest.assert(SJTest.match(bar, "?Foo"));
 	},
 
 	"match-classJSDoc?": function() {

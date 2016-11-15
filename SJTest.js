@@ -13,15 +13,16 @@
  *
  *  - assert() = SJTest.assert
  *  - match() = SJTest.match (a flexible matcher for easier testing)
- *  - assertMatch() = SJTest.assertMatch
+ *  - assertMatch() = SJTest.assertMatch = assert(match())
  *  - isa() = SJTest.isa (like instanceof, but more robust)
- *  - waitFor() = SJTest.waitFor (handy for async tests, and elsewhere)
+ *  - waitFor() = SJTest.waitFor (polling based, handy for async tests, and elsewhere)
  *
  * Usage:
  *
  *  - In the browser, must be switched on with SJTest.on = true; Or by adding SJTest=on to the url.
  *  - In PhantomJS: Run phantomjs SJTest.js MyTest1.html MyTest2.html
- *
+ *  - In Mocha: use assertMatch and match for joyful testing
+
  * Documentation: http://winterstein.github.io/SJTest/
  * Or see the code...
  */
@@ -156,7 +157,7 @@ ATest.prototype.toString = function() {
 var SJTest = SJTest || {};
 
 /** What version of SJTest is this? */
-SJTest.version = '0.3.3';
+SJTest.version = '0.3.4';
 
 /**
  * If true, isDone() will return false.
@@ -525,6 +526,7 @@ SJTest.match = function(value, matcher) {
 				continue;
 			}
 			try {
+				// eval the class-name
 				var fn = new Function("return "+m);
 				var klass = fn();
 				if (SJTest.isa(value, klass)) {
@@ -533,12 +535,14 @@ SJTest.match = function(value, matcher) {
 			} catch(err) {
 				// eval(m) failed to find a class
 				// A non-global ES6 class?
-				if (value.constructor) {
-					if (value.constructor.name === m) {
+				// Note: this is just for the string matcher. If the user put in a proper class object, we're fine.
+				var v = value;
+				while(true) {
+					if (v.constructor && v.constructor.name === m) {
 						return true;
 					}
-					// TODO how can we get to the super-class if there is one?
-					// Note: this is just for the string matcher. If the user put in a proper class object, we're fine.
+					v = Object.getPrototypeOf(v);
+					if ( ! v) break;
 				}
 			} // ./try class test
 		} // ./ for matcher-bit
