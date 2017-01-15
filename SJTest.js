@@ -959,6 +959,15 @@ if (typeof(navigator)!=='undefined' && navigator.userAgent
 // Run the polyfill
 SJTestUtils.init();
 
+if ( ! SJTest.phantomjsTopLevel) {
+	// pause momentarily to allow SJTest.on to maybe be set manually
+	SJTestUtils.onLoad(function() {
+		setTimeout(SJTest.display, 1);
+	});
+} else {
+	SJTest4Phantom.goPhantom();
+}
+
 
 // EXPORT
 if (typeof(module)!=='undefined') {
