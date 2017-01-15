@@ -157,7 +157,7 @@ ATest.prototype.toString = function() {
 var SJTest = SJTest || {};
 
 /** What version of SJTest is this? */
-SJTest.version = '0.3.4';
+SJTest.version = '0.3.5';
 
 /**
  * If true, isDone() will return false.
@@ -464,7 +464,7 @@ SJTest.assertMatch = function() {
 	for(var i=0; i<arguments.length; i+=2) {
 		var v = arguments[i];
 		var m = arguments[i+1];
-		SJTest.assert(SJTest.match(v, m), (arguments.length>2? ((i/2)+1)+') ':'')+ v +" !~ "+m);
+		SJTest.assert(SJTest.match(v, m), (arguments.length>2? ((i/2)+1)+') ':'')+ SJTestUtils.str(v) +" !~ "+m);
 	}
 };
 
@@ -832,33 +832,36 @@ SJTestUtils.init = function() {
 	/**
 	 * str -- Robust stringify. Use Winterwell's printer.str() if available. Else a simple version.
 	 */
-	if (window.printer && printer.str) {
-		SJTestUtils.str = printer.str;
-	} else {
-		SJTestUtils.str = function(obj) {
-			try {
-				var msg = JSON.stringify(obj);
-				return msg;
-			} catch(circularRefError) {
-				if (obj instanceof Array) {
-					var safe = [];
-					for(var i=0; i<obj.length; i++) {
-						safe[i] = SJTestUtils.str(obj[i]);
-					}
-					return JSON.stringify(safe);
-				}
-				// safety first
-				var safe = {};
-				for(var p in obj) {
-					var v = obj[p];
-					if (typeof(v) == 'function') continue;
-					else safe[p] = ""+v;
+	SJTestUtils.str = function(obj) {
+		// Use printer.str if defined
+		if (typeof(printer) !== 'undefined' && printer.str) {
+			return printer.str(obj);
+		}
+		try {
+			var msg = JSON.stringify(obj);
+			return msg;
+		} catch(circularRefError) {
+			if (obj instanceof Array) {
+				var safe = [];
+				for(var i=0; i<obj.length; i++) {
+					safe[i] = SJTestUtils.str(obj[i]);
 				}
 				return JSON.stringify(safe);
 			}
-		};
-	}	// str()
+			// safety first
+			var safe = {};
+			for(var p in obj) {
+				var v = obj[p];
+				if (typeof(v) == 'function') continue;
+				else safe[p] = ""+v;
+			}
+			return JSON.stringify(safe);
+		}
+	}; // str()
 
+	/**
+	 * A very light jQuery replacement, so there's no dependency. SJTest will use the proper jQuery (or zepto or whatever) if available!
+	 */
 	SJTestUtils.$ = function(thing) {
 		if ( ! thing) return thing;
 		if (window.$) return $(thing);
