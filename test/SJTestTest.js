@@ -1,6 +1,13 @@
 
 var SJTestTest = {
 	name:"SJTest",
+
+	"match-generic-array": function() {
+		SJTest.assert(SJTest.match(["a"], "String[]"));
+		SJTest.assert(SJTest.match([], "String[]"));
+		SJTest.assert( ! SJTest.match([{a:1}], "String[]"));
+	},
+
 	"match-str": function() {
 			SJTest.assert(SJTest.match("a", "a"));
 			SJTest.assert(SJTest.match("a"+"b", "ab"));

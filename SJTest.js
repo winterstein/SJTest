@@ -480,7 +480,6 @@ SJTest.assertMatch = function() {
 SJTest.isa = function(obj, klass) {
 	if (obj === klass) return true; // This can be too lenient, e.g. Number is not a Number. But it's generally correct for a prototype language.
 	if (obj instanceof klass) return true;
-	//assert(klass.constructor);
 	for(var i=0; i<10; i++) { // limit the recursion 10-deep for safety
 		if (obj === null || obj === undefined) return false;
 		if ( ! obj.constructor) return false;
@@ -515,7 +514,7 @@ SJTest.match = function(value, matcher) {
 		// Get the class function(s)
 		var ms = matcher.split("|");
 		for(var mi=0; mi<ms.length; mi++) {
-			var mArr = ms[mi].match(/^\??(\w+?)!?$/);
+			var mArr = ms[mi].match(/^\??(\w+?\[?\]?)!?$/);
 			if ( ! mArr) break;
 			var m = mArr[1];
 			if (sValue===m) return true;
@@ -524,6 +523,17 @@ SJTest.match = function(value, matcher) {
 				var nv = parseFloat(value);
 				if (nv || nv===0) return true;
 				continue;
+			}
+			// array syntax?
+			if (m.substr(m.length-2,m.length)==='[]') {
+				if (value.length===undefined) return false;
+				let arrayType = m.substr(0, m.length-2);
+				for(let vi=0; vi<value.length; vi++) {
+					if ( ! SJTest.match(value[vi], arrayType)) {
+						return false;
+					}
+				}
+				return true;
 			}
 			try {
 				// eval the class-name
