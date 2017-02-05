@@ -13,7 +13,7 @@
  *
  *  - assert() = SJTest.assert
  *  - match() = SJTest.match (a flexible matcher for easier testing)
- *  - assertMatch() = SJTest.assertMatch = assert(match())
+ *  - assMatch() = SJTest.assMatch = assert(match())
  *  - isa() = SJTest.isa (like instanceof, but more robust)
  *  - waitFor() = SJTest.waitFor (polling based, handy for async tests, and elsewhere)
  *
@@ -936,6 +936,9 @@ SJTestUtils.init = function() {
 		}
 		if ( ! window.assertMatch) {
 			window.assertMatch = SJTest.assertMatch;
+		}
+		if ( ! window.assMatch) {
+			window.assMatch = SJTest.assMatch;
 		}
 		if ( ! window.isa) {
 			window.isa = SJTest.isa;
