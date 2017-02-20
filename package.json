@@ -1,7 +1,7 @@
 {
   "name": "sjtest",
   "preferGlobal": true,
-  "version": "0.4.0",
+  "version": "0.4.2",
   "author": "winterstein <daniel@sodash.com>",
   "description": "Simple Javascript Testing (for browser-based code)",
   "contributors": [],
