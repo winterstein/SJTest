@@ -157,7 +157,7 @@ ATest.prototype.toString = function() {
 var SJTest = SJTest || {};
 
 /** What version of SJTest is this? */
-SJTest.version = '0.3.5';
+SJTest.version = '0.4.0';
 
 /**
  * If true, isDone() will return false.
@@ -469,6 +469,14 @@ SJTest.assertMatch = function() {
 };
 
 /**
+ * value, matcher
+ * @param msg {?string}
+ */
+SJTest.assMatch = function(value, matcher, msg) {
+	SJTest.assert(SJTest.match(value, matcher), msg || SJTestUtils.str(value) + " !~ " + SJTestUtils.str(matcher));	
+};
+
+/**
  * Like instanceof, but more robust.
  *
  * @param obj
@@ -494,7 +502,7 @@ SJTest.isa = function(obj, klass) {
 * @param value
 * @param matcher Can be another value.
 	Or a Class.
-	Or a JSDoc-style class spec such as "?Number" or "Number|Function".
+	Or a JSDoc-style class spec such as "?Number" or "Number|Function" or "String[]".
 	Or a regex (for matching against strings).
 	Or true/false (which match based on ifs semantics, e.g. '' matches false).
 	Or an object (which does partial matching, allowing value to have extra properties).
@@ -843,7 +851,7 @@ SJTestUtils.init = function() {
 	 * str -- Robust stringify. Use Winterwell's printer.str() if available. Else a simple version.
 	 */
 	SJTestUtils.str = function(obj) {
-		// Use printer.str if defined
+		// Use printer.str if defined (test at runtime to avoid ordering or race conditions on loading)
 		if (typeof(printer) !== 'undefined' && printer.str) {
 			return printer.str(obj);
 		}
@@ -986,6 +994,5 @@ if ( ! SJTest.phantomjsTopLevel) {
 if (typeof(module)!=='undefined') {
 	module.exports = SJTest;
 }
-
-// }(_window, _module));
-// end !SJTest wrapper function
+export default SJTest;
+export {assert, assMatch, assertMatch, SJTest};
