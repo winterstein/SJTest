@@ -157,7 +157,7 @@ ATest.prototype.toString = function() {
 var SJTest = SJTest || {};
 
 /** What version of SJTest is this? */
-SJTest.version = '0.4.0';
+SJTest.version = '0.4';
 
 /**
  * If true, isDone() will return false.
