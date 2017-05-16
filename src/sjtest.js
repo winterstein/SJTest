@@ -429,7 +429,7 @@ SJTest._displayTest = function(test) {
  * @returns betrue on success. This allows assert() to be used as a transparent wrapper.
  * E.g. you might write <code>var x = assert(mything.propertyWhichMustExist);</code>
  */
-SJTest.assert = function(betrue, msg) {
+SJTest.assert = function(betrue, ...msg) {
 	if (betrue) {
 		if (betrue.jquery && betrue.length===0) {
 			// empty jquery selection - treat as false
@@ -446,6 +446,8 @@ SJTest.assert = function(betrue, msg) {
  * Handle assert() failures. Users can replace this with a custom handler.
  */
 SJTest.assertFailed = function(msg) {
+	// we usually pass in an array from ...msg
+	if (msg.length===1) msg = msg[0];
 	console.error("assert", msg);
 	// A nice string?
 	var smsg = SJTestUtils.str(msg);
