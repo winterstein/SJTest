@@ -2,7 +2,7 @@
 echo "This script assumes you have a winterwell setup!"
 # Useful script for updating the jdoc, Winterwell web files etc.
 
-jsdoc SJTest.js
+jsdoc src/SJTest.js
 yuicompressor -o SJTest.min.js SJTest.js
 cp SJTest.js ~/winterwell/sodash/web/static/code/lib/
 cp SJTest.min.js ~/winterwell/sodash/web/static/code/lib/
