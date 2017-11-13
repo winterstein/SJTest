@@ -2,6 +2,17 @@
 var SJTestTest = {
 	name:"SJTest",
 
+	"match-type": function() {
+		let foo = {'@type':'Foo', name:'bar'};
+		let Foo = {'@type':'DataClass', type:'Foo'};
+		let Fooby = {'@type':'DataClass', type:'Fooby'};
+		SJTest.assert(SJTest.match(foo, 'Foo'));
+		SJTest.assert( ! SJTest.match(foo, 'Fooby'));
+		SJTest.assert(SJTest.match(foo, Foo));
+		SJTest.assert( ! SJTest.match(foo, Fooby));
+		SJTest.assert( ! SJTest.match(foo, "Number"));
+	},
+
 	"match-generic-array": function() {
 		SJTest.assert(SJTest.match(["a"], "String[]"));
 		SJTest.assert(SJTest.match([], "String[]"));

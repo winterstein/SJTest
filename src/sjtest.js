@@ -565,6 +565,8 @@ SJTest.match = function(value, matcher) {
 					if ( ! v) break;
 				}
 			} // ./try class test
+			// type? c.f. DataClass.js and FlexiGson
+			if (typeMatch(value, m)) return true;
 		} // ./ for matcher-bit
 		return false;
 	} // string matcher
@@ -610,10 +612,16 @@ SJTest.match = function(value, matcher) {
 	if (typeof value==='function') {
 		try {
 			var hardValue = value();
+			// ??Recurse??
 			if (hardValue==matcher) return true;
 			// Both lazy?
 			if (lazyMatcher && hardValue==lazyMatcher) return true;
 		} catch(ohwell) {}
+	}
+
+	// DataClass.js json "class" object and value?
+	if (typeMatch(value, m)) {
+		return true;
 	}
 
 	// partial object match? e.g. {a:1} matches {a:1, b:2}
@@ -630,6 +638,24 @@ SJTest.match = function(value, matcher) {
 
 	return false;
 };
+
+/**
+ * Schema.org type info (see also DataClass.js)
+ * @param matcher {String|DataClass|Object}
+ */
+function typeMatch(value, matcher) {
+	var m = typeof(matcher)==='string'? matcher : (matcher['@type']==='DataClass' && matcher.type);
+	if ( ! m) return false;
+	if (value.type === m || value['@type'] === m) {
+		return true;
+	}
+	// FlexiGson Java class type info
+	var fgt = typeof(value['@class']) === 'string' && value['@class'].substr(value['@class'].length - m.length); 
+	if (fgt === m) {
+		return true;
+	}
+	return false;
+}
 
 /** array utility: remove by value. @return array */
 SJTest.removeValue = function(item, array) {
