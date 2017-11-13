@@ -1,9 +1,5 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 /**
@@ -1017,17 +1013,3 @@ if (!SJTest.phantomjsTopLevel) {
 } else {
 	SJTest4Phantom.goPhantom();
 }
-
-// EXPORT
-if (typeof module !== 'undefined') {
-	module.exports = SJTest;
-}
-// try {
-exports.default = SJTest;
-exports.assert = assert;
-exports.assMatch = assMatch;
-exports.assertMatch = assertMatch;
-exports.SJTest = SJTest;
-// } catch(err) {
-// 	console.warn(err);
-// }

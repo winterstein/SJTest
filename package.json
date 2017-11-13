@@ -5,14 +5,7 @@
   "author": "winterstein <daniel@sodash.com>",
   "description": "Simple Javascript Testing (for browser-based code)",
   "contributors": [],
-  "scripts": {},
-  "main": "./bin/sjtest.js",
-  "scripts": {
-    "build": "babel src --out-dir bin --presets es2015",
-	"browserify": "browserify src/sjtest.js -o bin/bundle.js",
-    "watch": "babel src --out-dir bin --watch",
-    "prepublish": "npm run build"
-  },
+  "main": "./bin/sjtest_node.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/winterstein/SJTest.git"
@@ -23,9 +16,9 @@
     "unit"
   ],
   "devDependencies": {
-	"babel-cli": "^6.23.0",
-    "babel-preset-es2015": "^6.22.0",
-    "phantomjs": "*"
+		"babel-cli": "^6.23.0",
+   	"babel-preset-es2015": "^6.22.0",
+   	"phantomjs": "*"
   },
   "license": "MIT",
   "bugs": {
@@ -34,5 +27,12 @@
   "homepage": "https://github.com/winterstein/SJTest#readme",
   "directories": {
     "test": "test"
-  }
+  },
+  "scripts": {
+		"testBroken": "phantomjs src/sjtest_phantom.js test/SJTestTest.html",
+		"build": "babel src --out-dir bin --presets es2015",
+  		"browserify": "browserify src/sjtest.js -o bin/bundle.js",
+		"watch": "babel src --out-dir bin --watch",
+		"prepublish": "npm run build"
+ }
 }

@@ -1,4 +1,6 @@
 
+// Status: not working :(
+	
 // Phantom Runner?
 var SJTest4Phantom = {};
 

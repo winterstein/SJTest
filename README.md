@@ -44,7 +44,8 @@ Or from the command line, use PhantomJS to automate your testing:
 
 	phantomjs SJTest.js HelloWorld.html
 
-E.g. here is how to run SJTest's own unit tests: phantomjs SJTest.js test/SJTestTest.html
+TODO fix this (switching to npm broke it)
+E.g. here is how to run SJTest's own unit tests: `phantomjs SJTest.js test/SJTestTest.html`
 
 That's it -- All you need to write and run tests! BUT SJTest has plenty of other useful features...
 

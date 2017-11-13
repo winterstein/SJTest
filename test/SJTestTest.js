@@ -6,11 +6,12 @@ var SJTestTest = {
 		let foo = {'@type':'Foo', name:'bar'};
 		let Foo = {'@type':'DataClass', type:'Foo'};
 		let Fooby = {'@type':'DataClass', type:'Fooby'};
-		SJTest.assert(SJTest.match(foo, 'Foo'));
+		SJTest.assert(SJTest.match(foo, 'Foo'));		
 		SJTest.assert( ! SJTest.match(foo, 'Fooby'));
 		SJTest.assert(SJTest.match(foo, Foo));
 		SJTest.assert( ! SJTest.match(foo, Fooby));
 		SJTest.assert( ! SJTest.match(foo, "Number"));
+		SJTest.assert(SJTest.match(foo, 'Foo|Meh'));
 	},
 
 	"match-generic-array": function() {
