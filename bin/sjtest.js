@@ -518,6 +518,10 @@ SJTest.match = function (value, matcher) {
 	// TODO refactor to be cleaner & recursive
 	// simple
 	if (value == matcher) return true;
+	if (matcher === undefined) {
+		console.warn("SJTest: no matcher?!", value);
+		return value === null || value === undefined; // probably an error, but they might be testing for is-value-undefined
+	}
 	var sValue = "" + value;
 	if (typeof matcher === 'string') {
 		// JSDoc optional type? e.g. ?Number
@@ -626,7 +630,7 @@ SJTest.match = function (value, matcher) {
 	}
 
 	// DataClass.js json "class" object and value?
-	if (typeMatch(value, m)) {
+	if (typeMatch(value, matcher)) {
 		return true;
 	}
 
@@ -650,6 +654,7 @@ SJTest.match = function (value, matcher) {
  * @param matcher {String|DataClass|Object}
  */
 function typeMatch(value, matcher) {
+	if (!value) return false;
 	var m = typeof matcher === 'string' ? matcher : matcher['@type'] === 'DataClass' && matcher.type;
 	if (!m) return false;
 	if (value.type === m || value['@type'] === m) {
@@ -1010,6 +1015,4 @@ if (!SJTest.phantomjsTopLevel) {
 	SJTestUtils.onLoad(function () {
 		setTimeout(SJTest.display, 1);
 	});
-} else {
-	SJTest4Phantom.goPhantom();
 }
