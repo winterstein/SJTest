@@ -483,7 +483,7 @@ SJTest.assMatch = function (value, matcher, msg) {
 	if (SJTest.match(value, matcher)) {
 		return value; // All OK
 	}
-	var fullMsg = (msg || '') + SJTestUtils.str(value) + " !~ " + SJTestUtils.str(matcher);
+	var fullMsg = (msg ? msg + " " : '') + "a-match: " + SJTestUtils.str(value) + " !~ " + SJTestUtils.str(matcher);
 	SJTest.assert(false, fullMsg);
 };
 
