@@ -473,9 +473,14 @@ SJTest.assertMatch = function() {
 /**
  * value, matcher
  * @param msg {?string}
+ * @returns value
  */
 SJTest.assMatch = function(value, matcher, msg) {
-	SJTest.assert(SJTest.match(value, matcher), msg || SJTestUtils.str(value) + " !~ " + SJTestUtils.str(matcher));	
+	if (SJTest.match(value, matcher)) {
+		return value;	// All OK
+	}
+	var fullMsg = (msg || '') + SJTestUtils.str(value) + " !~ " + SJTestUtils.str(matcher);
+	SJTest.assert(false, fullMsg);	
 };
 
 /**
