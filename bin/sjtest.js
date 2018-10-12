@@ -517,6 +517,7 @@ SJTest.isa = function (obj, klass) {
 	Or a regex (for matching against strings).
 	Or true/false (which match based on ifs semantics, e.g. '' matches false).
 	Or an object (which does partial matching, allowing value to have extra properties).
+	Or a (Good-Loop) DataClass (which match based on the isa() function)
  @returns true if value matches, false otherwise
 */
 SJTest.match = function (value, matcher) {
@@ -656,7 +657,7 @@ SJTest.match = function (value, matcher) {
 
 /**
  * Schema.org type info (see also DataClass.js)
- * @param matcher {String|DataClass|Object}
+ * @param matcher {String|DataClass|Object} NB: Only String and DataClass can succeed. If an arbitrary Object, this will return false.
  */
 function typeMatch(value, matcher) {
 	if (!value) return false;
@@ -669,6 +670,16 @@ function typeMatch(value, matcher) {
 	var fgt = typeof value['@class'] === 'string' && value['@class'].substr(value['@class'].length - m.length);
 	if (fgt === m) {
 		return true;
+	}
+	// isa?
+	if (typeof matcher.isa === 'function') {
+		try {
+			var yeh = matcher.isa(value);
+			return yeh;
+		} catch (err) {
+			console.warn("SJTest typeMatch - isa error: " + err + " for " + value + " " + matcher);
+			// oh well
+		}
 	}
 	return false;
 }
