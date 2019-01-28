@@ -907,7 +907,7 @@ SJTestUtils.init = function () {
 			return printer.str(obj);
 		}
 		try {
-			var msg = JSON.stringify(obj);
+			var msg = JSON.stringify(obj) || "" + obj;
 			return msg;
 		} catch (circularRefError) {
 			if (obj instanceof Array) {
