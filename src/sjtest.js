@@ -343,10 +343,11 @@ SJTest.display = function() {
 		return;
 	}
 	//console.log(SJTest.LOGTAG, "Display!");
-	var good=0,total=SJTest.tests.length;
+	var good=0, bad=0, total=SJTest.tests.length;
 	for(var i=0; i<SJTest.tests.length; i++) {
 		var test = SJTest.tests[i];
 		if (test.getStatus()==='pass') good++;
+		if (test.getStatus()==='fail') bad++;
 	}
 	/** @ignore */
 	/* The display DOM element */
@@ -363,8 +364,9 @@ SJTest.display = function() {
 		SJTest._displayPanel.html("");
 	}
 	// Header
+	let result = bad > 0? "fail" : good===total? "pass" : "";
 	SJTest._displayPanel.append("<div class='panel-heading'><h2 class='panel-title'>"
-			+"Test Results: <span id='_SJTestGood'>"+good+"</span> / <span id='_SJTestTotal'>"+total+"</span>"
+			+"Test Results: <span id='_SJTestResult'>"+result+"</span> Failed: <span id='_SJTestBad'>"+bad+"</span>. <span id='_SJTestGood'>"+good+"</span> / <span id='_SJTestTotal'>"+total+"</span>"
 			+"<button title='Close Tests' type='button' "+(SJTest.styling? "style='float:right;'":'')+" class='close' aria-hidden='true' onclick=\"$('#SJTestDisplay').remove();\">&times;</button>"
 			+"</h2></div>");
 
@@ -405,14 +407,17 @@ SJTest._displayTest = function(test) {
 			+"</td><td>"+test.getStatus()+"</td><td>"+(test.error || SJTestUtils.str(test.details) || '-')
 			+" "+(test.stack || '')+"</td>");
 
-	// update scores
-	var good=0,total=SJTest.tests.length;
+	// HACK update scores (refactor to reuse code)
+	var good=0,bad=0, total=SJTest.tests.length;
 	for(var i=0; i<SJTest.tests.length; i++) {
 		var test = SJTest.tests[i];
 		if (test.getStatus()==='pass') good++;
+		if (test.getStatus()==='fail') bad++;
 	}
-
+	let result = bad > 0? "fail" : good===total? "pass" : "";
+	SJTestUtils.$getById('_SJTestResult').html(''+result);
 	SJTestUtils.$getById('_SJTestGood').html(''+good);
+	SJTestUtils.$getById('_SJTestBad').html(''+bad);
 	SJTestUtils.$getById('_SJTestTotal').html(''+total);
 };
 
