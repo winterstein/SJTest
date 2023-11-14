@@ -252,7 +252,6 @@ SJTest._started = new Date().getTime();
  */
 SJTest.isDone = function () {
 	//console.log("isDone?");
-	assert(!SJTest.phantomjsTopLevel);
 	if (SJTest.wait) return false;
 	if (new Date().getTime() < SJTest._started + SJTest.minTime) {
 		//console.log("Wait!");
@@ -352,10 +351,12 @@ SJTest.display = function () {
 	}
 	//console.log(SJTest.LOGTAG, "Display!");
 	var good = 0,
+	    bad = 0,
 	    total = SJTest.tests.length;
 	for (var i = 0; i < SJTest.tests.length; i++) {
 		var test = SJTest.tests[i];
 		if (test.getStatus() === 'pass') good++;
+		if (test.getStatus() === 'fail') bad++;
 	}
 	/** @ignore */
 	/* The display DOM element */
@@ -369,7 +370,8 @@ SJTest.display = function () {
 		SJTest._displayPanel.html("");
 	}
 	// Header
-	SJTest._displayPanel.append("<div class='panel-heading'><h2 class='panel-title'>" + "Test Results: <span id='_SJTestGood'>" + good + "</span> / <span id='_SJTestTotal'>" + total + "</span>" + "<button title='Close Tests' type='button' " + (SJTest.styling ? "style='float:right;'" : '') + " class='close' aria-hidden='true' onclick=\"$('#SJTestDisplay').remove();\">&times;</button>" + "</h2></div>");
+	var result = bad > 0 ? "fail" : good === total ? "pass" : "";
+	SJTest._displayPanel.append("<div class='panel-heading'><h2 class='panel-title'>" + "Test Results: <span id='_SJTestResult'>" + result + "</span> Failed: <span id='_SJTestBad'>" + bad + "</span>. <span id='_SJTestGood'>" + good + "</span> / <span id='_SJTestTotal'>" + total + "</span>" + "<button title='Close Tests' type='button' " + (SJTest.styling ? "style='float:right;'" : '') + " class='close' aria-hidden='true' onclick=\"$('#SJTestDisplay').remove();\">&times;</button>" + "</h2></div>");
 
 	/** @ignore */
 	/* DOM table fo results */
@@ -405,15 +407,19 @@ SJTest._displayTest = function (test) {
 
 	tr.html("<td><a href='#' title='Re-run this test' onclick='SJTest.runTest(\"" + test.name + "\"); return false;'>&#8635;</a></td><td>" + test.name + "</td><td>" + test.getStatus() + "</td><td>" + (test.error || SJTestUtils.str(test.details) || '-') + " " + (test.stack || '') + "</td>");
 
-	// update scores
+	// HACK update scores (refactor to reuse code)
 	var good = 0,
+	    bad = 0,
 	    total = SJTest.tests.length;
 	for (var i = 0; i < SJTest.tests.length; i++) {
 		var test = SJTest.tests[i];
 		if (test.getStatus() === 'pass') good++;
+		if (test.getStatus() === 'fail') bad++;
 	}
-
+	var result = bad > 0 ? "fail" : good === total ? "pass" : "";
+	SJTestUtils.$getById('_SJTestResult').html('' + result);
 	SJTestUtils.$getById('_SJTestGood').html('' + good);
+	SJTestUtils.$getById('_SJTestBad').html('' + bad);
 	SJTestUtils.$getById('_SJTestTotal').html('' + total);
 };
 
@@ -1011,24 +1017,10 @@ SJTestUtils.init = function () {
 
 // / END FUNCTIONS *** START SCRIPT ///
 
-// PhantomJS?
-if (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().indexOf("phantomjs") != -1) {
-	// In Phantom -- but top level or inside a page?
-	if (!window.location.hostname && (!window.location.pathname || window.location.pathname.length < 2 || window.location.pathname.substr(-'SJTest.js'.length) === 'SJTest.js')) {
-		SJTest.phantomjsTopLevel = true;
-	} else {
-		// disable display
-		SJTest.display = function () {};
-		SJTest._displayTest = function () {};
-	}
-}
-
 // Run the polyfill
 SJTestUtils.init();
 
-if (!SJTest.phantomjsTopLevel) {
-	// pause momentarily to allow SJTest.on to maybe be set manually
-	SJTestUtils.onLoad(function () {
-		setTimeout(SJTest.display, 1);
-	});
-}
+// pause momentarily to allow SJTest.on to maybe be set manually
+SJTestUtils.onLoad(function () {
+	setTimeout(SJTest.display, 1);
+});

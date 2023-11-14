@@ -17,8 +17,7 @@
   ],
   "devDependencies": {
 		"babel-cli": "^6.23.0",
-   	"babel-preset-es2015": "^6.22.0",
-   	"phantomjs": "*"
+   	"babel-preset-es2015": "^6.22.0"
   },
   "license": "MIT",
   "bugs": {
@@ -29,7 +28,6 @@
     "test": "test"
   },
   "scripts": {
-		"testBroken": "phantomjs src/sjtest_phantom.js test/SJTestTest.html",
 		"build": "babel src --out-dir bin --presets es2015",
   		"browserify": "browserify src/sjtest.js -o bin/bundle.js",
 		"watch": "babel src --out-dir bin --watch",

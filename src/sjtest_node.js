@@ -995,30 +995,13 @@ SJTestUtils.init = function() {
 
 // / END FUNCTIONS *** START SCRIPT ///
 
-// PhantomJS?
-if (typeof(navigator)!=='undefined' && navigator.userAgent
-		&& navigator.userAgent.toLowerCase().indexOf("phantomjs")!=-1) {
-	// In Phantom -- but top level or inside a page?
-	if ( ! window.location.hostname &&
-			( ! window.location.pathname || window.location.pathname.length < 2 || window.location.pathname.substr(-'SJTest.js'.length)==='SJTest.js'))
-	{
-		SJTest.phantomjsTopLevel = true;
-	} else {
-		// disable display
-		SJTest.display = function(){};
-		SJTest._displayTest = function(){};
-	}
-}
-
 // Run the polyfill
 SJTestUtils.init();
 
-if ( ! SJTest.phantomjsTopLevel) {
-	// pause momentarily to allow SJTest.on to maybe be set manually
-	SJTestUtils.onLoad(function() {
-		setTimeout(SJTest.display, 1);
-	});
-}
+// pause momentarily to allow SJTest.on to maybe be set manually
+SJTestUtils.onLoad(function() {
+	setTimeout(SJTest.display, 1);
+});
 
 /**
  * Provide export for use with npm / node.js
