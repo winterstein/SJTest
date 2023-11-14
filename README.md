@@ -1,5 +1,7 @@
 # SJTest: Simple Javascript Testing
 
+TODO: currently publish to npm is broken (something around the 2FA setup not working?!).
+
 [SJTest](http://www.winterwell.com/software/sjtest/) provides easy-to-use unit & behaviour test tools for browser-based javascript.
 
 > If you write web-pages with javascript, then SJTest can help you to develop & maintain them.
