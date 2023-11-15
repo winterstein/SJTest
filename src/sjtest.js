@@ -364,8 +364,9 @@ SJTest.display = function() {
 	}
 	// Header
 	let result = bad > 0? "fail" : good===total? "pass" : "";
+	let sDone = (good+bad)===total? "done" : "wait";
 	SJTest._displayPanel.append("<div class='panel-heading'><h2 class='panel-title'>"
-			+"Test Results: <span id='_SJTestResult'>"+result+"</span> Failed: <span id='_SJTestBad'>"+bad+"</span>. <span id='_SJTestGood'>"+good+"</span> / <span id='_SJTestTotal'>"+total+"</span>"
+			+"<span id='_SJTestResult' data-testid='results-"+sDone+"'>Overall Result: "+result+"</span> Failed: <span id='_SJTestBad'>"+bad+"</span>. <span id='_SJTestGood'>"+good+"</span> / <span id='_SJTestTotal'>"+total+"</span>"
 			+"<button title='Close Tests' type='button' "+(SJTest.styling? "style='float:right;'":'')+" class='close' aria-hidden='true' onclick=\"$('#SJTestDisplay').remove();\">&times;</button>"
 			+"</h2></div>");
 
@@ -413,8 +414,11 @@ SJTest._displayTest = function(test) {
 		if (test.getStatus()==='pass') good++;
 		if (test.getStatus()==='fail') bad++;
 	}
+	// HACK to setup info for a runner to read
 	let result = bad > 0? "fail" : good===total? "pass" : "";
-	SJTestUtils.$getById('_SJTestResult').html(''+result);
+	let sDone = (good+bad)===total? "done" : "wait";
+	SJTestUtils.$getById('_SJTestResult').html('Overall Result: '+result);
+	SJTestUtils.$getById('_SJTestResult').attr('data-testid', "results-"+sDone);
 	SJTestUtils.$getById('_SJTestGood').html(''+good);
 	SJTestUtils.$getById('_SJTestBad').html(''+bad);
 	SJTestUtils.$getById('_SJTestTotal').html(''+total);
