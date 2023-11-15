@@ -42,12 +42,10 @@ Load this page in a browser -- adding `SJTest=on` to the url -- and you'll see t
 
 [Try it now](http://www.winterwell.com/software/sjtest/HelloWorld.html?SJTest=on)
 
-Or from the command line, use PhantomJS to automate your testing:
-
-	phantomjs SJTest.js HelloWorld.html
+TODO how to use with Playwright
 
 TODO fix this (switching to npm broke it)
-E.g. here is how to run SJTest's own unit tests: `phantomjs SJTest.js test/SJTestTest.html`
+E.g. here is how to run SJTest's own unit tests: `?? SJTest.js test/SJTestTest.html`
 
 That's it -- All you need to write and run tests! BUT SJTest has plenty of other useful features...
 

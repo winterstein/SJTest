@@ -245,7 +245,6 @@ SJTest._started = new Date().getTime();
  */
 SJTest.isDone = function() {
 	//console.log("isDone?");
-	assert( ! SJTest.phantomjsTopLevel);
 	if (SJTest.wait) return false;
 	if (new Date().getTime() < SJTest._started + SJTest.minTime) {
 		//console.log("Wait!");

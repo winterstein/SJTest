@@ -69,7 +69,7 @@ ATest.prototype.getStatus = function() {return this._status;};
 ATest.prototype.setStatus	= function(s) {
 	assert('|queue|skip|running...|waiting|pass|fail|'.indexOf(s) != -1, s);
 	this._status = s;
-	// Logging status provides a hook for the PhantomJS runner to watch
+	// Logging status provides a hook for a scripted-browser-runner to watch
 	console.log(SJTest.LOGTAG+':'+this._status, this.name, this.details || this.stack || '');
 };
 /**
